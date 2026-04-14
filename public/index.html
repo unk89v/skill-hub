@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Hub - AI技能知识库</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --border-color: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .nav-brand i {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-stats {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .nav-stats strong {
+            color: var(--accent-blue);
+        }
+
+        /* 主布局 */
+        .main-container {
+            display: grid;
+            grid-template-columns: 260px 1fr 340px;
+            gap: 20px;
+            padding: 20px 32px;
+            max-width: 1600px;
+            margin: 0 auto;
+            min-height: calc(100vh - 70px);
+        }
+
+        .panel {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fafbfc;
+        }
+
+        .panel-header i { color: var(--accent-blue); }
+
+        .panel-body {
+            padding: 12px;
+            max-height: calc(100vh - 150px);
+            overflow-y: auto;
+        }
+
+        /* 搜索框 */
+        .search-box {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        /* 分类列表 */
+        .category-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-bottom: 4px;
+        }
+
+        .category-item:hover {
+            background: #f1f5f9;
+        }
+
+        .category-item.active {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            border-left: 3px solid var(--accent-blue);
+        }
+
+        .category-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .category-info {
+            flex: 1;
+        }
+
+        .category-name {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .category-count {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* 技能列表 */
+        .skill-item {
+            padding: 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .skill-item:hover {
+            border-color: var(--accent-blue);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+        }
+
+        .skill-item.active {
+            border-color: var(--accent-blue);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .skill-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .skill-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .skill-usage {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .skill-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .skill-tag {
+            padding: 2px 8px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* 详情面板 */
+        .detail-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            color: var(--text-secondary);
+        }
+
+        .detail-empty i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .detail-content {
+            padding: 20px;
+        }
+
+        .detail-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .detail-name {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-family: 'Monaco', monospace;
+            background: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 16px;
+        }
+
+        .detail-desc {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .detail-section {
+            margin-bottom: 20px;
+        }
+
+        .detail-section h4 {
+            font-size: 13px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .detail-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .related-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .related-skill {
+            padding: 6px 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .related-skill:hover {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 40px;
+            margin-bottom: 12px;
+            opacity: 0.4;
+        }
+
+        /* 滚动条 */
+        .panel-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .panel-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .panel-body::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 240px 1fr;
+            }
+            .detail-panel { display: none; }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                padding: 12px;
+            }
+            .category-panel { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-cube"></i>
+            <span>Skill Hub</span>
+        </div>
+        <div class="nav-stats">
+            共 <strong id="totalSkills">0</strong> 个技能
+        </div>
+    </nav>
+
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 左侧：分类 -->
+        <div class="panel category-panel">
+            <div class="panel-header">
+                <i class="fas fa-folder"></i>
+                <span>技能分类</span>
+            </div>
+            <div class="panel-body" id="categoryList"></div>
+        </div>
+
+        <!-- 中间：技能列表 -->
+        <div class="panel">
+            <div class="panel-header">
+                <i class="fas fa-list"></i>
+                <span id="listTitle">全部技能</span>
+            </div>
+            <div class="panel-body">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="搜索技能名称、描述、标签...">
+                </div>
+                <div id="skillList"></div>
+            </div>
+        </div>
+
+        <!-- 右侧：详情 -->
+        <div class="panel detail-panel">
+            <div class="panel-header">
+                <i class="fas fa-info-circle"></i>
+                <span>技能详情</span>
+            </div>
+            <div class="panel-body" id="detailPanel">
+                <div class="detail-empty">
+                    <i class="fas fa-mouse-pointer"></i>
+                    <p>点击技能查看详情</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allSkills = [];
+        let categories = [];
+        let currentCategory = null;
+        let selectedSkill = null;
+
+        // 颜色映射
+        const COLORS = {
+            ai: '#8b5cf6',
+            dev: '#3b82f6',
+            data: '#06b6d4',
+            content: '#10b981',
+            search: '#f59e0b',
+            productivity: '#ec4899',
+            automation: '#6366f1',
+            marketing: '#ef4444',
+            design: '#14b8a6',
+            translation: '#f97316',
+            education: '#84cc16',
+            finance: '#0ea5e9'
+        };
+
+        // 初始化
+        async function init() {
+            try {
+                const res = await fetch('/api/skills');
+                const data = await res.json();
+                categories = data.categories;
+                allSkills = data.skills;
+                
+                document.getElementById('totalSkills').textContent = allSkills.length;
+                
+                renderCategories();
+                renderSkills(allSkills);
+            } catch (e) {
+                console.error('加载失败:', e);
+            }
+        }
+
+        // 渲染分类
+        function renderCategories() {
+            const container = document.getElementById('categoryList');
+            
+            // 全部分类
+            let html = `
+                <div class="category-item ${!currentCategory ? 'active' : ''}" onclick="selectCategory(null)">
+                    <div class="category-icon" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white;">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div class="category-info">
+                        <div class="category-name">全部</div>
+                        <div class="category-count">${allSkills.length} 个技能</div>
+                    </div>
+                </div>
+            `;
+            
+            categories.forEach(cat => {
+                const count = allSkills.filter(s => s.category === cat.id).length;
+                const color = COLORS[cat.id] || '#64748b';
+                html += `
+                    <div class="category-item ${currentCategory === cat.id ? 'active' : ''}" onclick="selectCategory('${cat.id}')">
+                        <div class="category-icon" style="background: ${color}20; color: ${color};">
+                            <i class="${cat.icon}"></i>
+                        </div>
+                        <div class="category-info">
+                            <div class="category-name">${cat.name}</div>
+                            <div class="category-count">${count} 个技能</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // 选择分类
+        function selectCategory(catId) {
+            currentCategory = catId;
+            renderCategories();
+            
+            const filtered = catId ? allSkills.filter(s => s.category === catId) : allSkills;
+            renderSkills(filtered);
+            
+            const cat = categories.find(c => c.id === catId);
+            document.getElementById('listTitle').textContent = cat ? cat.name : '全部技能';
+        }
+
+        // 搜索技能
+        function searchSkills(query) {
+            if (!query.trim()) {
+                const filtered = currentCategory ? allSkills.filter(s => s.category === currentCategory) : allSkills;
+                renderSkills(filtered);
+                return;
+            }
+            
+            const q = query.toLowerCase();
+            const results = allSkills.filter(skill => {
+                return skill.title.toLowerCase().includes(q) ||
+                       skill.name.toLowerCase().includes(q) ||
+                       skill.desc.toLowerCase().includes(q) ||
+                       skill.tags.some(t => t.toLowerCase().includes(q));
+            });
+            
+            // 按相关性排序
+            results.sort((a, b) => {
+                const scoreA = getRelevanceScore(a, q);
+                const scoreB = getRelevanceScore(b, q);
+                return scoreB - scoreA;
+            });
+            
+            renderSkills(results);
+            document.getElementById('listTitle').textContent = `搜索结果 (${results.length})`;
+        }
+
+        // 计算相关性分数
+        function getRelevanceScore(skill, query) {
+            let score = 0;
+            const q = query.toLowerCase();
+            
+            // 标题完全匹配
+            if (skill.title.toLowerCase() === q) score += 100;
+            // 标题包含
+            else if (skill.title.toLowerCase().includes(q)) score += 50;
+            
+            // 名称匹配
+            if (skill.name.toLowerCase().includes(q)) score += 40;
+            
+            // 标签匹配
+            skill.tags.forEach(tag => {
+                if (tag.toLowerCase() === q) score += 30;
+                else if (tag.toLowerCase().includes(q)) score += 15;
+            });
+            
+            // 描述匹配
+            if (skill.desc.toLowerCase().includes(q)) score += 10;
+            
+            return score;
+        }
+
+        // 渲染技能列表
+        function renderSkills(skills) {
+            const container = document.getElementById('skillList');
+            
+            if (skills.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <p>没有找到匹配的技能</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = skills.map(skill => {
+                const color = COLORS[skill.category] || '#64748b';
+                return `
+                    <div class="skill-item ${selectedSkill?.id === skill.id ? 'active' : ''}" onclick="selectSkill(${skill.id})">
+                        <div class="skill-header">
+                            <span class="skill-title">${skill.title}</span>
+                            <span class="skill-usage">
+                                <i class="fas fa-fire"></i>
+                                ${(skill.usage / 1000).toFixed(1)}k
+                            </span>
+                        </div>
+                        <div class="skill-desc">${skill.desc}</div>
+                        <div class="skill-tags">
+                            ${skill.tags.slice(0, 3).map(t => `<span class="skill-tag">${t}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 选择技能
+        function selectSkill(id) {
+            selectedSkill = allSkills.find(s => s.id === id);
+            renderDetails(selectedSkill);
+            
+            // 更新列表高亮
+            const filtered = currentCategory ? allSkills.filter(s => s.category === currentCategory) : allSkills;
+            renderSkills(filtered);
+        }
+
+        // 渲染详情
+        function renderDetails(skill) {
+            const container = document.getElementById('detailPanel');
+            
+            if (!skill) {
+                container.innerHTML = `
+                    <div class="detail-empty">
+                        <i class="fas fa-mouse-pointer"></i>
+                        <p>点击技能查看详情</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const related = skill.related
+                .map(id => allSkills.find(s => s.id === id))
+                .filter(Boolean);
+            
+            container.innerHTML = `
+                <div class="detail-content">
+                    <h2 class="detail-title">${skill.title}</h2>
+                    <span class="detail-name">${skill.name}</span>
+                    <p class="detail-desc">${skill.desc}</p>
+                    
+                    <div class="detail-stats">
+                        <div class="stat-card">
+                            <div class="stat-value">${(skill.usage / 1000).toFixed(1)}k</div>
+                            <div class="stat-label">使用次数</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${skill.tags.length}</div>
+                            <div class="stat-label">标签数</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${skill.related.length}</div>
+                            <div class="stat-label">关联技能</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h4>标签</h4>
+                        <div class="skill-tags">
+                            ${skill.tags.map(t => `<span class="skill-tag">${t}</span>`).join('')}
+                        </div>
+                    </div>
+                    
+                    ${related.length > 0 ? `
+                    <div class="detail-section">
+                        <h4>相关技能</h4>
+                        <div class="related-skills">
+                            ${related.map(s => `
+                                <span class="related-skill" onclick="selectSkill(${s.id})">${s.title}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // 搜索事件
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchSkills(e.target.value);
+        });
+
+        // 启动
+        init();
+    </script>
+</body>
+</html>

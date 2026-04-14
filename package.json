@@ -1,0 +1,14 @@
+{
+  "name": "skill-hub",
+  "version": "1.0.0",
+  "description": "AI技能知识库 - 300+技能收录与关联图谱",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}
