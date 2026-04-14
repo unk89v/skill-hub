@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skill Hub - AI技能知识库</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         :root {
             --bg-primary: #f8fafc;
@@ -31,7 +32,7 @@
         .navbar {
             background: var(--bg-secondary);
             border-bottom: 1px solid var(--border-color);
-            padding: 16px 32px;
+            padding: 12px 32px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -44,7 +45,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
         }
 
@@ -54,8 +55,32 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .nav-stats {
+        .nav-tabs {
+            display: flex;
+            gap: 4px;
+        }
+
+        .nav-tab {
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
             font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .nav-tab:hover {
+            background: #f1f5f9;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            color: var(--accent-blue);
+        }
+
+        .nav-stats {
+            font-size: 13px;
             color: var(--text-secondary);
         }
 
@@ -63,7 +88,7 @@
             color: var(--accent-blue);
         }
 
-        /* 主布局 */
+        /* 主容器 */
         .main-container {
             display: grid;
             grid-template-columns: 260px 1fr 340px;
@@ -71,7 +96,35 @@
             padding: 20px 32px;
             max-width: 1600px;
             margin: 0 auto;
-            min-height: calc(100vh - 70px);
+            min-height: calc(100vh - 60px);
+        }
+
+        /* 图谱视图 */
+        .graph-container {
+            display: none;
+            padding: 20px;
+        }
+
+        .graph-container.active {
+            display: block;
+        }
+
+        #graphView {
+            width: 100%;
+            height: calc(100vh - 120px);
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .list-view {
+            display: grid;
+            grid-template-columns: 260px 1fr 340px;
+            gap: 20px;
+        }
+
+        .list-view.hidden {
+            display: none;
         }
 
         .panel {
@@ -82,7 +135,7 @@
         }
 
         .panel-header {
-            padding: 16px;
+            padding: 14px 16px;
             border-bottom: 1px solid var(--border-color);
             font-weight: 600;
             display: flex;
@@ -107,7 +160,7 @@
 
         .search-box input {
             width: 100%;
-            padding: 12px 16px 12px 40px;
+            padding: 10px 14px 10px 38px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 14px;
@@ -122,7 +175,7 @@
 
         .search-box i {
             position: absolute;
-            left: 14px;
+            left: 12px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-secondary);
@@ -133,11 +186,11 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 12px;
+            padding: 10px 12px;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.15s;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .category-item:hover {
@@ -165,17 +218,17 @@
 
         .category-name {
             font-weight: 500;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .category-count {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-secondary);
         }
 
         /* 技能列表 */
         .skill-item {
-            padding: 14px;
+            padding: 12px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
             margin-bottom: 8px;
@@ -202,11 +255,11 @@
 
         .skill-title {
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .skill-usage {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-secondary);
             display: flex;
             align-items: center;
@@ -214,23 +267,61 @@
         }
 
         .skill-desc {
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-secondary);
             line-height: 1.5;
+            margin-bottom: 8px;
         }
 
         .skill-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 8px;
+            gap: 4px;
         }
 
+        /* 标签颜色 - 丰富配色 */
         .skill-tag {
             padding: 2px 8px;
-            background: #f1f5f9;
             border-radius: 4px;
-            font-size: 11px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        /* 预定义标签颜色 */
+        .tag-AI { background: #8b5cf620; color: #8b5cf6; }
+        .tag-搜索 { background: #f59e0b20; color: #d97706; }
+        .tag-营销 { background: #ef444420; color: #dc2626; }
+        .tag-开发 { background: #3b82f620; color: #2563eb; }
+        .tag-数据 { background: #06b6d420; color: #0891b2; }
+        .tag-自动化 { background: #6366f120; color: #4f46e5; }
+        .tag-设计 { background: #ec489920; color: #db2777; }
+        .tag-翻译 { background: #f9731620; color: #ea580c; }
+        .tag-内容 { background: #10b98120; color: #059669; }
+        .tag-效率 { background: #84cc1620; color: #65a30d; }
+        .tag-社交 { background: #f43f5e20; color: #e11d48; }
+        .tag-飞书 { background: #0ea5e920; color: #0284c7; }
+        .tag-企业微信 { background: #22c55e20; color: #16a34a; }
+        .tag-微博 { background: #f9731620; color: #ea580c; }
+        .tag-文档 { background: #64748b20; color: #475569; }
+        .tag-写作 { background: #a855f720; color: #9333ea; }
+        .tag-图像 { background: #ec489920; color: #db2777; }
+        .tag-语音 { background: #14b8a620; color: #0d9488; }
+        .tag-视频 { background: #f59e0b20; color: #d97706; }
+        .tag-测试 { background: #64748b20; color: #475569; }
+        .tag-安全 { background: #ef444420; color: #dc2626; }
+        .tag-运维 { background: #78716c20; color: #57534e; }
+        .tag-财务 { background: #0ea5e920; color: #0284c7; }
+        .tag-教育 { background: #8b5cf620; color: #7c3aed; }
+        .tag-研究 { background: #6366f120; color: #4f46e5; }
+        .tag-学术 { background: #3b82f620; color: #2563eb; }
+        .tag-代码 { background: #1e293b20; color: #1e293b; }
+        .tag-模型 { background: #8b5cf620; color: #7c3aed; }
+        .tag-聊天 { background: #06b6d420; color: #0891b2; }
+        .tag-机器人 { background: #64748b20; color: #475569; }
+
+        /* 默认标签颜色 */
+        .skill-tag.default {
+            background: #f1f5f9;
             color: var(--text-secondary);
         }
 
@@ -251,80 +342,98 @@
         }
 
         .detail-content {
-            padding: 20px;
+            padding: 16px;
         }
 
         .detail-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .detail-name {
-            font-size: 14px;
+            font-size: 12px;
             color: var(--text-secondary);
             font-family: 'Monaco', monospace;
             background: #f1f5f9;
             padding: 4px 8px;
             border-radius: 4px;
             display: inline-block;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
+        }
+
+        .detail-url {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            border-radius: 6px;
+            font-size: 12px;
+            color: var(--accent-blue);
+            text-decoration: none;
+            margin-bottom: 12px;
+        }
+
+        .detail-url:hover {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
         }
 
         .detail-desc {
-            font-size: 14px;
+            font-size: 13px;
             line-height: 1.7;
             color: var(--text-secondary);
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .detail-section {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .detail-section h4 {
-            font-size: 13px;
+            font-size: 11px;
             text-transform: uppercase;
             color: var(--text-secondary);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
         }
 
         .detail-stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
+            gap: 10px;
+            margin-bottom: 16px;
         }
 
         .stat-card {
             text-align: center;
-            padding: 12px;
+            padding: 10px;
             background: #f8fafc;
             border-radius: 8px;
         }
 
         .stat-value {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             color: var(--accent-blue);
         }
 
         .stat-label {
-            font-size: 12px;
+            font-size: 10px;
             color: var(--text-secondary);
         }
 
         .related-skills {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
         }
 
         .related-skill {
-            padding: 6px 12px;
+            padding: 5px 10px;
             background: #f1f5f9;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 12px;
             cursor: pointer;
             transition: all 0.15s;
         }
@@ -361,20 +470,75 @@
             border-radius: 3px;
         }
 
+        /* 图谱工具提示 */
+        .graph-tooltip {
+            position: absolute;
+            padding: 10px 14px;
+            background: rgba(30, 41, 59, 0.95);
+            color: white;
+            border-radius: 8px;
+            font-size: 13px;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 280px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .graph-tooltip h4 {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .graph-tooltip p {
+            font-size: 12px;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        /* 图谱图例 */
+        .graph-legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
         /* 响应式 */
         @media (max-width: 1200px) {
-            .main-container {
+            .main-container, .list-view {
                 grid-template-columns: 240px 1fr;
             }
             .detail-panel { display: none; }
         }
 
         @media (max-width: 768px) {
-            .main-container {
+            .main-container, .list-view {
                 grid-template-columns: 1fr;
                 padding: 12px;
             }
             .category-panel { display: none; }
+            .nav-tabs { display: none; }
         }
     </style>
 </head>
@@ -385,13 +549,21 @@
             <i class="fas fa-cube"></i>
             <span>Skill Hub</span>
         </div>
+        <div class="nav-tabs">
+            <div class="nav-tab active" data-view="list" onclick="switchView('list')">
+                <i class="fas fa-list"></i> 列表视图
+            </div>
+            <div class="nav-tab" data-view="graph" onclick="switchView('graph')">
+                <i class="fas fa-project-diagram"></i> 关系图谱
+            </div>
+        </div>
         <div class="nav-stats">
-            共 <strong id="totalSkills">0</strong> 个技能
+            共 <strong id="totalSkills">0</strong> 个技能 · <strong id="totalCategories">0</strong> 个分类
         </div>
     </nav>
 
-    <!-- 主容器 -->
-    <div class="main-container">
+    <!-- 列表视图 -->
+    <div class="main-container list-view" id="listView">
         <!-- 左侧：分类 -->
         <div class="panel category-panel">
             <div class="panel-header">
@@ -431,14 +603,21 @@
         </div>
     </div>
 
+    <!-- 图谱视图 -->
+    <div class="graph-container" id="graphContainer">
+        <svg id="graphView"></svg>
+        <div class="graph-legend" id="graphLegend"></div>
+    </div>
+
     <script>
         let allSkills = [];
         let categories = [];
         let currentCategory = null;
         let selectedSkill = null;
+        let currentView = 'list';
 
-        // 颜色映射
-        const COLORS = {
+        // 分类颜色映射
+        const CATEGORY_COLORS = {
             ai: '#8b5cf6',
             dev: '#3b82f6',
             data: '#06b6d4',
@@ -453,6 +632,52 @@
             finance: '#0ea5e9'
         };
 
+        // 技能官网映射
+        const SKILL_URLS = {
+            'baidu-search': 'https://www.baidu.com',
+            'baidu-scholar-search': 'https://xueshu.baidu.com',
+            'baidu-baike-data': 'https://baike.baidu.com',
+            'weibo-hot-search': 'https://s.weibo.com/top/summary',
+            'weibo-search': 'https://weibo.com',
+            'weibo-crowd': 'https://weibo.com',
+            'weibo-status': 'https://weibo.com',
+            'feishu-doc': 'https://www.feishu.cn',
+            'feishu-wiki': 'https://www.feishu.cn',
+            'feishu-drive': 'https://www.feishu.cn',
+            'feishu-bitable': 'https://www.feishu.cn',
+            'wecom-doc-manager': 'https://work.weixin.qq.com',
+            'wecom-smartsheet': 'https://work.weixin.qq.com',
+            'wecom-schedule': 'https://work.weixin.qq.com',
+            'wecom-meeting': 'https://work.weixin.qq.com',
+            'wecom-msg': 'https://work.weixin.qq.com',
+            'wecom-todo': 'https://work.weixin.qq.com',
+            'wecom-contact': 'https://work.weixin.qq.com',
+            'deepresearch-conversation': 'https://yiyan.baidu.com',
+            'web_fetch': 'https://github.com/openclaw',
+            'weather': 'https://wttr.in',
+            'clawhub': 'https://clawhub.com',
+            'chatgpt-api': 'https://platform.openai.com',
+            'gpt-vision': 'https://platform.openai.com',
+            'dall-e': 'https://openai.com/dall-e-3',
+            'stable-diffusion': 'https://stability.ai',
+            'midjourney': 'https://www.midjourney.com',
+            'langchain': 'https://www.langchain.com',
+            'llamaindex': 'https://www.llamaindex.ai',
+            'huggingface': 'https://huggingface.co',
+            'github-copilot': 'https://github.com/features/copilot'
+        };
+
+        // 技能详细描述
+        const SKILL_DESCRIPTIONS = {
+            'baidu-search': '百度AI搜索是一种智能搜索服务，能够理解用户意图，提供精准的搜索结果。支持自然语言查询，可根据上下文进行语义理解。',
+            'deepresearch-conversation': '百度提供的深度研究对话能力，支持多轮对话进行深度研究和分析，适合复杂问题的逐步探索。',
+            'feishu-doc': '飞书文档是字节跳动旗下的在线协作文档工具，支持多人实时编辑、评论、版本管理等功能，提供完整的API接口进行文档操作。',
+            'wecom-meeting': '企业微信会议提供企业级视频会议服务，支持预约会议、邀请成员、会议录制等功能，可与企业通讯录深度集成。',
+            'chatgpt-api': 'OpenAI ChatGPT API提供强大的对话生成能力，支持GPT-4、GPT-4-turbo等模型，可用于构建智能对话应用。',
+            'langchain': 'LangChain是一个开源框架，用于构建基于大语言模型(LLM)的应用程序，提供了链式调用、记忆管理、工具集成等核心功能。',
+            'clawhub': 'ClawHub是AI技能市场平台，提供技能的搜索、安装、更新和发布功能，帮助开发者快速集成AI能力。'
+        };
+
         // 初始化
         async function init() {
             try {
@@ -462,6 +687,7 @@
                 allSkills = data.skills;
                 
                 document.getElementById('totalSkills').textContent = allSkills.length;
+                document.getElementById('totalCategories').textContent = categories.length;
                 
                 renderCategories();
                 renderSkills(allSkills);
@@ -470,11 +696,27 @@
             }
         }
 
+        // 切换视图
+        function switchView(view) {
+            currentView = view;
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.view === view);
+            });
+            
+            if (view === 'graph') {
+                document.getElementById('listView').classList.add('hidden');
+                document.getElementById('graphContainer').classList.add('active');
+                renderGraph();
+            } else {
+                document.getElementById('listView').classList.remove('hidden');
+                document.getElementById('graphContainer').classList.remove('active');
+            }
+        }
+
         // 渲染分类
         function renderCategories() {
             const container = document.getElementById('categoryList');
             
-            // 全部分类
             let html = `
                 <div class="category-item ${!currentCategory ? 'active' : ''}" onclick="selectCategory(null)">
                     <div class="category-icon" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white;">
@@ -489,7 +731,7 @@
             
             categories.forEach(cat => {
                 const count = allSkills.filter(s => s.category === cat.id).length;
-                const color = COLORS[cat.id] || '#64748b';
+                const color = CATEGORY_COLORS[cat.id] || '#64748b';
                 html += `
                     <div class="category-item ${currentCategory === cat.id ? 'active' : ''}" onclick="selectCategory('${cat.id}')">
                         <div class="category-icon" style="background: ${color}20; color: ${color};">
@@ -518,6 +760,21 @@
             document.getElementById('listTitle').textContent = cat ? cat.name : '全部技能';
         }
 
+        // 获取标签样式类
+        function getTagClass(tag) {
+            const tagMap = {
+                'AI': 'tag-AI', '搜索': 'tag-搜索', '营销': 'tag-营销', '开发': 'tag-开发',
+                '数据': 'tag-数据', '自动化': 'tag-自动化', '设计': 'tag-设计', '翻译': 'tag-翻译',
+                '内容': 'tag-内容', '效率': 'tag-效率', '社交': 'tag-社交', '飞书': 'tag-飞书',
+                '企业微信': 'tag-企业微信', '微博': 'tag-微博', '文档': 'tag-文档', '写作': 'tag-写作',
+                '图像': 'tag-图像', '语音': 'tag-语音', '视频': 'tag-视频', '测试': 'tag-测试',
+                '安全': 'tag-安全', '运维': 'tag-运维', '财务': 'tag-财务', '教育': 'tag-教育',
+                '研究': 'tag-研究', '学术': 'tag-学术', '代码': 'tag-代码', '模型': 'tag-模型',
+                '聊天': 'tag-聊天', '机器人': 'tag-机器人'
+            };
+            return tagMap[tag] || 'default';
+        }
+
         // 搜索技能
         function searchSkills(query) {
             if (!query.trim()) {
@@ -534,13 +791,7 @@
                        skill.tags.some(t => t.toLowerCase().includes(q));
             });
             
-            // 按相关性排序
-            results.sort((a, b) => {
-                const scoreA = getRelevanceScore(a, q);
-                const scoreB = getRelevanceScore(b, q);
-                return scoreB - scoreA;
-            });
-            
+            results.sort((a, b) => getRelevanceScore(b, q) - getRelevanceScore(a, q));
             renderSkills(results);
             document.getElementById('listTitle').textContent = `搜索结果 (${results.length})`;
         }
@@ -550,21 +801,13 @@
             let score = 0;
             const q = query.toLowerCase();
             
-            // 标题完全匹配
             if (skill.title.toLowerCase() === q) score += 100;
-            // 标题包含
             else if (skill.title.toLowerCase().includes(q)) score += 50;
-            
-            // 名称匹配
             if (skill.name.toLowerCase().includes(q)) score += 40;
-            
-            // 标签匹配
             skill.tags.forEach(tag => {
                 if (tag.toLowerCase() === q) score += 30;
                 else if (tag.toLowerCase().includes(q)) score += 15;
             });
-            
-            // 描述匹配
             if (skill.desc.toLowerCase().includes(q)) score += 10;
             
             return score;
@@ -584,24 +827,21 @@
                 return;
             }
             
-            container.innerHTML = skills.map(skill => {
-                const color = COLORS[skill.category] || '#64748b';
-                return `
-                    <div class="skill-item ${selectedSkill?.id === skill.id ? 'active' : ''}" onclick="selectSkill(${skill.id})">
-                        <div class="skill-header">
-                            <span class="skill-title">${skill.title}</span>
-                            <span class="skill-usage">
-                                <i class="fas fa-fire"></i>
-                                ${(skill.usage / 1000).toFixed(1)}k
-                            </span>
-                        </div>
-                        <div class="skill-desc">${skill.desc}</div>
-                        <div class="skill-tags">
-                            ${skill.tags.slice(0, 3).map(t => `<span class="skill-tag">${t}</span>`).join('')}
-                        </div>
+            container.innerHTML = skills.map(skill => `
+                <div class="skill-item ${selectedSkill?.id === skill.id ? 'active' : ''}" onclick="selectSkill(${skill.id})">
+                    <div class="skill-header">
+                        <span class="skill-title">${skill.title}</span>
+                        <span class="skill-usage">
+                            <i class="fas fa-fire"></i>
+                            ${(skill.usage / 1000).toFixed(1)}k
+                        </span>
                     </div>
-                `;
-            }).join('');
+                    <div class="skill-desc">${skill.desc}</div>
+                    <div class="skill-tags">
+                        ${skill.tags.slice(0, 3).map(t => `<span class="skill-tag ${getTagClass(t)}">${t}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
         }
 
         // 选择技能
@@ -609,7 +849,6 @@
             selectedSkill = allSkills.find(s => s.id === id);
             renderDetails(selectedSkill);
             
-            // 更新列表高亮
             const filtered = currentCategory ? allSkills.filter(s => s.category === currentCategory) : allSkills;
             renderSkills(filtered);
         }
@@ -632,11 +871,15 @@
                 .map(id => allSkills.find(s => s.id === id))
                 .filter(Boolean);
             
+            const url = SKILL_URLS[skill.name];
+            const fullDesc = SKILL_DESCRIPTIONS[skill.name] || skill.desc;
+            
             container.innerHTML = `
                 <div class="detail-content">
                     <h2 class="detail-title">${skill.title}</h2>
                     <span class="detail-name">${skill.name}</span>
-                    <p class="detail-desc">${skill.desc}</p>
+                    ${url ? `<a href="${url}" target="_blank" class="detail-url"><i class="fas fa-external-link-alt"></i> 访问官网</a>` : ''}
+                    <p class="detail-desc">${fullDesc}</p>
                     
                     <div class="detail-stats">
                         <div class="stat-card">
@@ -656,7 +899,7 @@
                     <div class="detail-section">
                         <h4>标签</h4>
                         <div class="skill-tags">
-                            ${skill.tags.map(t => `<span class="skill-tag">${t}</span>`).join('')}
+                            ${skill.tags.map(t => `<span class="skill-tag ${getTagClass(t)}">${t}</span>`).join('')}
                         </div>
                     </div>
                     
@@ -672,6 +915,173 @@
                     ` : ''}
                 </div>
             `;
+        }
+
+        // 渲染图谱
+        function renderGraph() {
+            const svg = d3.select('#graphView');
+            const width = svg.node().getBoundingClientRect().width;
+            const height = svg.node().getBoundingClientRect().height;
+            
+            svg.selectAll('*').remove();
+            
+            // 选择部分技能（热门和有关系的）
+            const topSkills = allSkills
+                .sort((a, b) => b.usage - a.usage)
+                .slice(0, 80);
+            
+            // 构建节点和链接
+            const nodes = topSkills.map(s => ({
+                id: s.id,
+                name: s.title,
+                category: s.category,
+                usage: s.usage,
+                radius: Math.max(6, Math.min(20, s.usage / 8000))
+            }));
+            
+            const links = [];
+            topSkills.forEach(skill => {
+                skill.related.forEach(rid => {
+                    const target = nodes.find(n => n.id === rid);
+                    if (target && skill.id < rid) {
+                        links.push({ source: skill.id, target: rid });
+                    }
+                });
+            });
+            
+            // 创建力导向图
+            const simulation = d3.forceSimulation(nodes)
+                .force('link', d3.forceLink(links).id(d => d.id).distance(80))
+                .force('charge', d3.forceManyBody().strength(-200))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(d => d.radius + 5));
+            
+            // 绘制链接
+            const link = svg.append('g')
+                .selectAll('line')
+                .data(links)
+                .enter().append('line')
+                .attr('stroke', '#e2e8f0')
+                .attr('stroke-width', 1);
+            
+            // 绘制节点
+            const node = svg.append('g')
+                .selectAll('circle')
+                .data(nodes)
+                .enter().append('circle')
+                .attr('r', d => d.radius)
+                .attr('fill', d => CATEGORY_COLORS[d.category] || '#64748b')
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 2)
+                .style('cursor', 'pointer')
+                .on('mouseover', function(event, d) {
+                    d3.select(this).attr('stroke-width', 3);
+                    showTooltip(event, d);
+                })
+                .on('mouseout', function() {
+                    d3.select(this).attr('stroke-width', 2);
+                    hideTooltip();
+                })
+                .on('click', (event, d) => {
+                    switchView('list');
+                    selectSkill(d.id);
+                })
+                .call(d3.drag()
+                    .on('start', dragstarted)
+                    .on('drag', dragged)
+                    .on('end', dragended));
+            
+            // 添加标签
+            const labels = svg.append('g')
+                .selectAll('text')
+                .data(nodes.filter(n => n.radius > 10))
+                .enter().append('text')
+                .text(d => d.name.length > 6 ? d.name.slice(0, 6) + '...' : d.name)
+                .attr('font-size', '10px')
+                .attr('fill', '#64748b')
+                .attr('text-anchor', 'middle')
+                .attr('dy', d => d.radius + 12);
+            
+            simulation.on('tick', () => {
+                link
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+                
+                node
+                    .attr('cx', d => d.x = Math.max(d.radius, Math.min(width - d.radius, d.x)))
+                    .attr('cy', d => d.y = Math.max(d.radius, Math.min(height - d.radius, d.y)));
+                
+                labels
+                    .attr('x', d => d.x)
+                    .attr('y', d => d.y);
+            });
+            
+            // 渲染图例
+            renderLegend();
+            
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+            
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+            
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+        }
+
+        // 显示提示
+        function showTooltip(event, d) {
+            let tooltip = document.querySelector('.graph-tooltip');
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.className = 'graph-tooltip';
+                document.body.appendChild(tooltip);
+            }
+            
+            const skill = allSkills.find(s => s.id === d.id);
+            tooltip.innerHTML = `
+                <h4>${d.name}</h4>
+                <p>${skill?.desc || ''}</p>
+            `;
+            tooltip.style.left = (event.pageX + 10) + 'px';
+            tooltip.style.top = (event.pageY - 10) + 'px';
+            tooltip.style.display = 'block';
+        }
+
+        // 隐藏提示
+        function hideTooltip() {
+            const tooltip = document.querySelector('.graph-tooltip');
+            if (tooltip) tooltip.style.display = 'none';
+        }
+
+        // 渲染图例
+        function renderLegend() {
+            const container = document.getElementById('graphLegend');
+            const cats = [
+                { id: 'ai', name: 'AI' },
+                { id: 'dev', name: '开发' },
+                { id: 'data', name: '数据' },
+                { id: 'content', name: '内容' },
+                { id: 'productivity', name: '效率' },
+                { id: 'marketing', name: '营销' }
+            ];
+            
+            container.innerHTML = cats.map(cat => `
+                <div class="legend-item">
+                    <div class="legend-color" style="background: ${CATEGORY_COLORS[cat.id]}"></div>
+                    <span>${cat.name}</span>
+                </div>
+            `).join('');
         }
 
         // 搜索事件
