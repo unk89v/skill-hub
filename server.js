@@ -1,9 +1,21 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
+
+// 讯飞星辰 API 配置
+const XUNFEI_CONFIG = {
+    appId: process.env.XUNFEI_APP_ID || '',
+    apiKey: process.env.XUNFEI_API_KEY || '',
+    apiSecret: process.env.XUNFEI_API_SECRET || '',
+    // 星辰大模型 API 地址
+    host: 'maas-api.cn-huabei-1.xf-yun.com',
+    path: '/v1/chat/completions'
+};
 
 // 中间件
 app.use(express.json({ limit: '100mb' }));
@@ -88,6 +100,155 @@ function saveCases(data) {
     fs.writeFileSync(CASES_FILE, JSON.stringify(data, null, 2));
 }
 
+// ==================== 讯飞星辰 API 调用 ====================
+
+// 生成讯飞 API 鉴权签名
+function generateXunfeiAuth() {
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+    const signatureOrigin = `host: ${XUNFEI_CONFIG.host}\ndate: ${timestamp}\nGET ${XUNFEI_CONFIG.path} HTTP/1.1`;
+    
+    const hmacSha256 = crypto.createHmac('sha256', XUNFEI_CONFIG.apiSecret);
+    hmacSha256.update(signatureOrigin);
+    const signature = hmacSha256.digest('base64');
+    
+    const authorizationOrigin = `api_key="${XUNFEI_CONFIG.apiKey}", algorithm="hmac-sha256", headers="host date request-line", signature="${signature}"`;
+    const authorization = Buffer.from(authorizationOrigin).toString('base64');
+    
+    return {
+        authorization,
+        date: timestamp,
+        host: XUNFEI_CONFIG.host
+    };
+}
+
+// 调用讯飞星辰大模型
+async function callXunfeiLLM(messages, options = {}) {
+    const { model = 'xDeepV3', temperature = 0.7, maxTokens = 2048 } = options;
+    
+    return new Promise((resolve, reject) => {
+        const requestBody = JSON.stringify({
+            model,
+            messages,
+            temperature,
+            max_tokens: maxTokens,
+            stream: false
+        });
+        
+        const auth = generateXunfeiAuth();
+        
+        const requestOptions = {
+            hostname: XUNFEI_CONFIG.host,
+            port: 443,
+            path: `${XUNFEI_CONFIG.path}?authorization=${auth.authorization}&date=${encodeURIComponent(auth.date)}&host=${auth.host}`,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(requestBody)
+            }
+        };
+        
+        const req = https.request(requestOptions, (res) => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                try {
+                    const result = JSON.parse(data);
+                    if (result.choices && result.choices[0]) {
+                        resolve({
+                            success: true,
+                            content: result.choices[0].message.content,
+                            usage: result.usage
+                        });
+                    } else if (result.error) {
+                        reject(new Error(result.error.message || 'API Error'));
+                    } else {
+                        reject(new Error('Invalid response format'));
+                    }
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        });
+        
+        req.on('error', reject);
+        req.write(requestBody);
+        req.end();
+    });
+}
+
+// 备用：简单的关键词匹配回答
+function getFallbackAnswer(question, skills) {
+    const q = question.toLowerCase();
+    
+    const qaRules = [
+        {
+            patterns: ['怎么开始', '如何使用', '新手', '入门', '怎么用', '怎么学'],
+            answer: '建议从热门技能开始探索，点击技能卡片查看详情，然后查看关联技能来发现更多。每个技能都有详细的使用说明和案例分享。',
+            skills: skills.sort((a, b) => b.usage - a.usage).slice(0, 3)
+        },
+        {
+            patterns: ['ai', '人工智能', 'gpt', 'chatgpt', '大模型', '对话'],
+            answer: '我们有很多AI相关技能，从对话生成到智能助手，可以满足各种场景需求。推荐从ChatGPT API开始学习。',
+            skills: skills.filter(s => s.tags.includes('AI') || s.category === 'ai').slice(0, 5)
+        },
+        {
+            patterns: ['客服', '机器人', '聊天', '自动回复'],
+            answer: '搭建智能客服系统需要多个技能配合。建议先了解AI对话能力，再学习自动化流程，最后整合企业通讯工具。',
+            skills: skills.filter(s => s.tags.includes('AI') || s.tags.includes('自动化') || s.tags.includes('企业微信')).slice(0, 5)
+        },
+        {
+            patterns: ['自动化', '效率', '工作流', '批量'],
+            answer: '自动化技能可以帮你节省大量时间，推荐从这些热门自动化技能开始。掌握后可以大幅提升工作效率。',
+            skills: skills.filter(s => s.tags.includes('自动化') || s.category === 'automation').slice(0, 5)
+        },
+        {
+            patterns: ['文档', '写作', '内容', '文章'],
+            answer: '内容创作技能可以帮助你快速生成高质量内容，提升写作效率。飞书文档技能特别适合团队协作。',
+            skills: skills.filter(s => s.category === 'content' || s.tags.includes('文档') || s.tags.includes('飞书')).slice(0, 5)
+        },
+        {
+            patterns: ['数据', '分析', '可视化', '报表', '统计'],
+            answer: '数据分析技能可以帮助你从数据中发现洞察，做出更好的决策。推荐从数据可视化开始学习。',
+            skills: skills.filter(s => s.category === 'data' || s.tags.includes('数据')).slice(0, 5)
+        },
+        {
+            patterns: ['营销', '推广', '微博', '增长', '获客'],
+            answer: '营销增长技能可以帮助你快速触达目标用户，提升品牌影响力。微博热搜和内容营销是不错的起点。',
+            skills: skills.filter(s => s.category === 'marketing' || s.tags.includes('营销') || s.tags.includes('微博')).slice(0, 5)
+        },
+        {
+            patterns: ['飞书', '办公', '协作'],
+            answer: '飞书技能可以帮助团队高效协作，包括文档管理、日程安排、会议组织等功能。',
+            skills: skills.filter(s => s.tags.includes('飞书') || s.category === 'productivity').slice(0, 5)
+        },
+        {
+            patterns: ['企业微信', '会议', '日程', '通知'],
+            answer: '企业微信技能适合企业内部沟通和协作，包括会议管理、日程提醒、消息通知等功能。',
+            skills: skills.filter(s => s.tags.includes('企业微信') || s.category === 'productivity').slice(0, 5)
+        },
+        {
+            patterns: ['推荐', '建议', '哪个好', '选择'],
+            answer: '根据热门程度和使用场景，我为你推荐以下技能。点击查看详情了解更多。',
+            skills: skills.sort((a, b) => b.usage - a.usage).slice(0, 5)
+        }
+    ];
+    
+    for (const rule of qaRules) {
+        if (rule.patterns.some(p => q.includes(p))) {
+            return {
+                answer: rule.answer,
+                skills: rule.skills
+            };
+        }
+    }
+    
+    // 默认推荐
+    return {
+        answer: '我理解你的问题。让我为你推荐一些热门技能，或者你可以告诉我更具体的需求，我会给出更精准的建议。',
+        skills: skills.sort((a, b) => b.usage - a.usage).slice(0, 3)
+    };
+}
+
 // ==================== 技能 API ====================
 
 // API: 获取所有技能
@@ -109,14 +270,12 @@ app.get('/api/skills/:id', (req, res) => {
             return res.status(404).json({ error: 'Skill not found' });
         }
         
-        // 添加评分统计
         const ratings = loadRatings();
         const skillRatings = ratings[req.params.id] || [];
         const avgRating = skillRatings.length > 0 
             ? (skillRatings.reduce((sum, r) => sum + r.rating, 0) / skillRatings.length).toFixed(1)
             : 0;
         
-        // 添加案例统计
         const cases = loadCases();
         const skillCases = cases[req.params.id] || [];
         
@@ -184,7 +343,7 @@ app.get('/api/search', (req, res) => {
 // ==================== 智能推荐 API ====================
 
 // API: 智能推荐 - 根据目标推荐技能路径
-app.post('/api/recommend', (req, res) => {
+app.post('/api/recommend', async (req, res) => {
     try {
         const { goal, context } = req.body;
         if (!goal) {
@@ -360,7 +519,6 @@ ${suggestions.map(s => `- ${s}`).join('\n')}
             filename += '.json';
             mimeType = 'application/json';
         } else {
-            // 纯文本
             content = `${pathTheme || '技能学习路径'}
 目标：${goal}
 生成时间：${new Date().toLocaleString('zh-CN')}
@@ -390,69 +548,108 @@ ${suggestions.map(s => '• ' + s).join('\n')}
     }
 });
 
-// API: 智能问答
-app.post('/api/qa', (req, res) => {
+// API: 智能问答 - 接入讯飞星辰大模型
+app.post('/api/qa', async (req, res) => {
     try {
-        const { question } = req.body;
+        const { question, history } = req.body;
         if (!question) {
             return res.status(400).json({ error: 'Question is required' });
         }
 
         const data = loadSkills();
-        const q = question.toLowerCase();
+        const skills = data.skills;
         
-        const qaRules = [
+        // 检查是否配置了讯飞 API
+        if (!XUNFEI_CONFIG.apiKey || !XUNFEI_CONFIG.apiSecret) {
+            console.log('讯飞 API 未配置，使用备用回答');
+            const fallback = getFallbackAnswer(question, skills);
+            return res.json({
+                question,
+                answer: fallback.answer,
+                relatedSkills: fallback.skills,
+                followUp: '还有其他问题吗？',
+                source: 'fallback'
+            });
+        }
+        
+        // 构建技能知识库摘要
+        const skillSummary = skills.slice(0, 30).map(s => 
+            `- ${s.title}: ${s.desc.slice(0, 50)}... (分类: ${s.category}, 标签: ${s.tags.join(',')})`
+        ).join('\n');
+        
+        // 构建对话消息
+        const messages = [
             {
-                patterns: ['怎么开始', '如何使用', '新手', '入门'],
-                answer: '建议从热门技能开始探索，点击技能卡片查看详情，然后查看关联技能来发现更多。',
-                skills: data.skills.sort((a, b) => b.usage - a.usage).slice(0, 3)
-            },
-            {
-                patterns: ['ai', '人工智能', 'gpt', 'chatgpt'],
-                answer: '我们有很多AI相关技能，从对话生成到图像识别，可以满足各种场景需求。',
-                skills: data.skills.filter(s => s.tags.includes('AI') || s.category === 'ai').slice(0, 5)
-            },
-            {
-                patterns: ['自动化', '效率', '工作流'],
-                answer: '自动化技能可以帮你节省大量时间，推荐从这些热门自动化技能开始。',
-                skills: data.skills.filter(s => s.tags.includes('自动化') || s.category === 'automation').slice(0, 5)
-            },
-            {
-                patterns: ['文档', '写作', '内容'],
-                answer: '内容创作技能可以帮助你快速生成高质量内容，提升写作效率。',
-                skills: data.skills.filter(s => s.category === 'content' || s.tags.includes('文档')).slice(0, 5)
-            },
-            {
-                patterns: ['数据', '分析', '可视化'],
-                answer: '数据分析技能可以帮助你从数据中发现洞察，做出更好的决策。',
-                skills: data.skills.filter(s => s.category === 'data' || s.tags.includes('数据')).slice(0, 5)
+                role: 'system',
+                content: `你是 Skillverse 技能宇宙的智能助手，帮助用户发现和选择适合的技能。
+
+你的职责：
+1. 理解用户的目标和需求
+2. 从技能库中推荐合适的技能
+3. 解释为什么推荐这些技能
+4. 给出学习路径建议
+
+技能库概览：
+${skillSummary}
+
+回答要求：
+- 简洁明了，直接回答用户问题
+- 推荐技能时说明原因
+- 给出实用的学习建议
+- 如果用户问题不明确，引导他们描述具体需求`
             }
         ];
         
-        let matched = null;
-        for (const rule of qaRules) {
-            if (rule.patterns.some(p => q.includes(p))) {
-                matched = rule;
-                break;
-            }
+        // 添加历史对话
+        if (history && history.length > 0) {
+            history.forEach(h => {
+                messages.push({ role: 'user', content: h.question });
+                messages.push({ role: 'assistant', content: h.answer });
+            });
         }
         
-        if (matched) {
-            res.json({
-                question,
-                answer: matched.answer,
-                relatedSkills: matched.skills,
-                followUp: '还有其他问题吗？'
+        // 添加当前问题
+        messages.push({ role: 'user', content: question });
+        
+        try {
+            // 调用讯飞星辰 API
+            const result = await callXunfeiLLM(messages, {
+                model: 'xDeepV3',
+                temperature: 0.7,
+                maxTokens: 1024
             });
-        } else {
-            const topSkills = data.skills.sort((a, b) => b.usage - a.usage).slice(0, 3);
+            
+            // 匹配相关技能
+            const questionLower = question.toLowerCase();
+            const relatedSkills = skills.filter(skill => {
+                return skill.title.toLowerCase().includes(questionLower) ||
+                       skill.tags.some(t => questionLower.includes(t.toLowerCase())) ||
+                       skill.desc.toLowerCase().includes(questionLower);
+            }).slice(0, 5);
+            
             res.json({
                 question,
-                answer: '我理解你的问题。让我为你推荐一些相关技能，或者你可以告诉我更具体的需求。',
-                relatedSkills: topSkills,
-                followUp: '你具体想实现什么功能？'
+                answer: result.content,
+                relatedSkills: relatedSkills.length > 0 ? relatedSkills : skills.sort((a, b) => b.usage - a.usage).slice(0, 3),
+                followUp: '还有其他问题吗？我可以继续帮你推荐技能。',
+                source: 'xunfei'
+            });
+            
+        } catch (apiError) {
+            console.error('讯飞 API 调用失败:', apiError.message);
+            
+            // 使用备用回答
+            const fallback = getFallbackAnswer(question, skills);
+            res.json({
+                question,
+                answer: fallback.answer,
+                relatedSkills: fallback.skills,
+                followUp: '还有其他问题吗？',
+                source: 'fallback',
+                error: apiError.message
             });
         }
+        
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -463,12 +660,21 @@ app.post('/api/qa', (req, res) => {
 app.get('/api/graph', (req, res) => {
     try {
         const data = loadSkills();
-        const limit = parseInt(req.query.limit) || 80;
+        const limit = parseInt(req.query.limit) || 100;
         const category = req.query.category;
+        const search = req.query.search;
         
         let skills = data.skills;
         if (category) {
             skills = skills.filter(s => s.category === category);
+        }
+        if (search) {
+            const searchLower = search.toLowerCase();
+            skills = skills.filter(s => 
+                s.title.toLowerCase().includes(searchLower) ||
+                s.name.toLowerCase().includes(searchLower) ||
+                s.tags.some(t => t.toLowerCase().includes(searchLower))
+            );
         }
         
         const topSkills = skills.sort((a, b) => b.usage - a.usage).slice(0, limit);
@@ -477,7 +683,8 @@ app.get('/api/graph', (req, res) => {
             id: s.id,
             name: s.title,
             category: s.category,
-            usage: s.usage
+            usage: s.usage,
+            tags: s.tags
         }));
         
         const links = [];
@@ -596,7 +803,6 @@ app.delete('/api/notes/:skillId/:noteId', (req, res) => {
 
 // ==================== 评分 API ====================
 
-// 获取技能评分列表
 app.get('/api/ratings/:skillId', (req, res) => {
     try {
         const ratings = loadRatings();
@@ -616,7 +822,6 @@ app.get('/api/ratings/:skillId', (req, res) => {
     }
 });
 
-// 提交评分
 app.post('/api/ratings', (req, res) => {
     try {
         const { skillId, rating, review, userId } = req.body;
@@ -631,7 +836,6 @@ app.post('/api/ratings', (req, res) => {
             ratings[skillId] = [];
         }
         
-        // 检查是否已评分（每个用户每个技能只能评一次）
         const existingIndex = ratings[skillId].findIndex(r => r.userId === userId);
         
         const ratingData = {
@@ -665,22 +869,17 @@ app.post('/api/ratings', (req, res) => {
 
 // ==================== 使用案例 API ====================
 
-// 获取技能案例列表
 app.get('/api/cases/:skillId', (req, res) => {
     try {
         const cases = loadCases();
         const skillCases = cases[req.params.skillId] || [];
-        
-        // 按点赞数排序
         skillCases.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-        
         res.json(skillCases);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
-// 提交使用案例
 app.post('/api/cases', (req, res) => {
     try {
         const { skillId, title, content, tags, userId, userName } = req.body;
@@ -717,7 +916,6 @@ app.post('/api/cases', (req, res) => {
     }
 });
 
-// 点赞案例
 app.post('/api/cases/:skillId/:caseId/like', (req, res) => {
     try {
         const { skillId, caseId } = req.params;
@@ -728,18 +926,14 @@ app.post('/api/cases/:skillId/:caseId/like', (req, res) => {
         if (cases[skillId]) {
             const caseItem = cases[skillId].find(c => c.id === parseInt(caseId));
             if (caseItem) {
-                if (!caseItem.likedBy) {
-                    caseItem.likedBy = [];
-                }
+                if (!caseItem.likedBy) caseItem.likedBy = [];
                 
                 const hasLiked = caseItem.likedBy.includes(userId);
                 
                 if (hasLiked) {
-                    // 取消点赞
                     caseItem.likedBy = caseItem.likedBy.filter(id => id !== userId);
                     caseItem.likes = Math.max(0, (caseItem.likes || 0) - 1);
                 } else {
-                    // 点赞
                     caseItem.likedBy.push(userId);
                     caseItem.likes = (caseItem.likes || 0) + 1;
                 }
@@ -757,7 +951,6 @@ app.post('/api/cases/:skillId/:caseId/like', (req, res) => {
     }
 });
 
-// 删除案例
 app.delete('/api/cases/:skillId/:caseId', (req, res) => {
     try {
         const { skillId, caseId } = req.params;
@@ -773,7 +966,7 @@ app.delete('/api/cases/:skillId/:caseId', (req, res) => {
                 saveCases(cases);
                 res.json({ success: true });
             } else {
-                res.status(403).json({ error: 'Not authorized to delete this case' });
+                res.status(403).json({ error: 'Not authorized' });
             }
         } else {
             res.status(404).json({ error: 'Skill not found' });
@@ -788,13 +981,22 @@ app.listen(PORT, () => {
     console.log(`
 ╔════════════════════════════════════════════╗
 ║                                            ║
-║   🌌 Skillverse v3.0 is running!           ║
+║   🌌 Skillverse v3.2 is running!           ║
 ║                                            ║
 ║   Local:  http://localhost:${PORT}            ║
 ║                                            ║
-║   ✨ 探索技能宇宙，发现无限可能              ║
+║   ✨ 全屏图谱 | 🤖 讯飞星辰智能问答          ║
 ║   ⭐ 技能评分 | 📝 使用案例 | 📤 导出路径   ║
 ║                                            ║
 ╚════════════════════════════════════════════╝
     `);
+    
+    // 检查讯飞 API 配置
+    if (XUNFEI_CONFIG.apiKey && XUNFEI_CONFIG.apiSecret) {
+        console.log('✅ 讯飞星辰 API 已配置');
+    } else {
+        console.log('⚠️  讯飞星辰 API 未配置，请设置环境变量：');
+        console.log('   XUNFEI_API_KEY=your_api_key');
+        console.log('   XUNFEI_API_SECRET=your_api_secret');
+    }
 });

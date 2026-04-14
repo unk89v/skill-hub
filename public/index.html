@@ -73,18 +73,15 @@
 
         /* 导航 */
         .navbar {
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             z-index: 100;
-            padding: 16px 24px;
-            background: rgba(10, 10, 26, 0.9);
+            padding: 12px 24px;
+            background: rgba(10, 10, 26, 0.95);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .nav-content {
-            max-width: 1400px;
-            margin: 0 auto;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -93,32 +90,26 @@
         .logo {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
         }
 
         .logo-icon {
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             background: linear-gradient(135deg, var(--aurora-pink), var(--aurora-purple), var(--aurora-blue));
-            border-radius: 14px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
+            font-size: 20px;
         }
 
         .logo-text h1 {
-            font-size: 22px;
+            font-size: 18px;
             font-weight: 800;
             background: linear-gradient(135deg, white, var(--aurora-blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-        }
-
-        .logo-text p {
-            font-size: 11px;
-            color: rgba(255,255,255,0.4);
         }
 
         .nav-tabs {
@@ -126,7 +117,7 @@
             gap: 4px;
             background: rgba(255,255,255,0.03);
             padding: 4px;
-            border-radius: 12px;
+            border-radius: 10px;
         }
 
         .nav-tab {
@@ -158,7 +149,7 @@
         }
 
         .nav-btn {
-            padding: 10px 18px;
+            padding: 10px 16px;
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 10px;
@@ -187,15 +178,19 @@
         .main-container {
             position: relative;
             z-index: 1;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px;
+            padding-top: 72px;
         }
 
         .view { display: none; }
         .view.active { display: block; }
 
-        /* Hero */
+        /* 探索视图 */
+        #exploreView {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
         .hero {
             text-align: center;
             padding: 40px 0 32px;
@@ -403,7 +398,6 @@
             padding: 24px;
             cursor: pointer;
             transition: all 0.3s;
-            position: relative;
         }
 
         .skill-card:hover {
@@ -427,7 +421,7 @@
             align-items: center;
             justify-content: center;
             font-size: 24px;
-            background: var(--icon-bg);
+            background: linear-gradient(135deg, var(--aurora-purple), var(--aurora-pink));
             box-shadow: 0 8px 20px rgba(168, 85, 247, 0.3);
         }
 
@@ -504,25 +498,6 @@
             border-top: 1px solid rgba(255,255,255,0.06);
         }
 
-        .skill-related {
-            font-size: 12px;
-            color: rgba(255,255,255,0.4);
-        }
-
-        .skill-related i { color: var(--aurora-purple); }
-
-        .skill-cta {
-            padding: 8px 16px;
-            background: linear-gradient(135deg, var(--aurora-purple), var(--aurora-pink));
-            border-radius: 10px;
-            font-size: 12px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        /* 技能评分显示 */
         .skill-rating {
             display: flex;
             align-items: center;
@@ -535,127 +510,220 @@
             color: var(--star-gold);
         }
 
-        /* 图谱视图 */
-        .graph-container {
-            height: calc(100vh - 200px);
-            background: rgba(255,255,255,0.03);
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.06);
+        .skill-cta {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, var(--aurora-purple), var(--aurora-pink));
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ==================== 全屏图谱视图 ==================== */
+        
+        #graphView {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding-top: 72px;
+            background: var(--cosmic-purple);
+        }
+
+        .graph-fullscreen {
+            width: 100%;
+            height: 100%;
             position: relative;
-            overflow: hidden;
         }
 
         #graphSvg {
             width: 100%;
             height: 100%;
+            cursor: grab;
+        }
+
+        #graphSvg:active {
+            cursor: grabbing;
+        }
+
+        .graph-top-bar {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .graph-search-box {
+            width: 400px;
+            padding: 14px 20px 14px 48px;
+            background: rgba(26, 26, 46, 0.95);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px;
+            font-size: 14px;
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .graph-search-box:focus {
+            outline: none;
+            border-color: var(--aurora-purple);
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.3);
+        }
+
+        .graph-search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255,255,255,0.4);
+            font-size: 16px;
+        }
+
+        .graph-filter {
+            padding: 14px 20px;
+            background: rgba(26, 26, 46, 0.95);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px;
+            font-size: 14px;
+            color: white;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
         }
 
         .graph-controls {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
+            bottom: 30px;
+            left: 30px;
             display: flex;
+            flex-direction: column;
             gap: 8px;
             z-index: 10;
         }
 
         .graph-btn {
-            width: 40px;
-            height: 40px;
-            background: rgba(26, 26, 46, 0.9);
+            width: 48px;
+            height: 48px;
+            background: rgba(26, 26, 46, 0.95);
             border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            color: rgba(255,255,255,0.6);
+            color: rgba(255,255,255,0.7);
+            font-size: 16px;
             transition: all 0.2s;
+            backdrop-filter: blur(10px);
         }
 
         .graph-btn:hover {
             border-color: var(--aurora-purple);
             color: white;
+            background: rgba(168, 85, 247, 0.2);
         }
 
-        .graph-search {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            z-index: 10;
-            display: flex;
-            gap: 12px;
-        }
-
-        .graph-search input {
-            flex: 1;
-            padding: 12px 16px 12px 40px;
-            background: rgba(26, 26, 46, 0.9);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            font-size: 14px;
-            color: white;
-        }
-
-        .graph-search input:focus {
-            outline: none;
-            border-color: var(--aurora-purple);
-        }
-
-        .graph-search-icon {
-            position: absolute;
-            left: 32px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: rgba(255,255,255,0.3);
-        }
-
-        .graph-filter {
-            padding: 12px 16px;
-            background: rgba(26, 26, 46, 0.9);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            font-size: 13px;
-            color: white;
-            cursor: pointer;
+        .graph-btn.active {
+            background: linear-gradient(135deg, var(--aurora-purple), var(--aurora-pink));
+            border-color: transparent;
         }
 
         .graph-legend {
             position: absolute;
-            top: 80px;
-            right: 20px;
-            background: rgba(26, 26, 46, 0.9);
-            padding: 16px;
-            border-radius: 12px;
+            top: 100px;
+            right: 30px;
+            background: rgba(26, 26, 46, 0.95);
+            padding: 20px;
+            border-radius: 16px;
             border: 1px solid rgba(255,255,255,0.1);
             z-index: 10;
+            backdrop-filter: blur(10px);
+            max-width: 200px;
         }
 
         .legend-title {
-            font-size: 11px;
+            font-size: 12px;
             color: rgba(255,255,255,0.5);
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            font-weight: 600;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 11px;
-            margin-bottom: 6px;
+            gap: 10px;
+            font-size: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .legend-item:hover {
+            background: rgba(255,255,255,0.05);
         }
 
         .legend-dot {
-            width: 8px;
-            height: 8px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .graph-stats {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(26, 26, 46, 0.95);
+            padding: 16px 20px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            font-size: 12px;
+        }
+
+        .graph-stats-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .graph-stat {
+            text-align: center;
+        }
+
+        .graph-stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--aurora-blue);
+        }
+
+        .graph-stat-label {
+            font-size: 10px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* 图谱节点样式 */
+        .node-label {
+            font-size: 11px;
+            fill: rgba(255,255,255,0.8);
+            text-anchor: middle;
+            pointer-events: none;
+            font-weight: 500;
         }
 
         /* 推荐视图 */
         .recommend-container {
             max-width: 900px;
             margin: 0 auto;
+            padding: 24px;
         }
 
         .recommend-input {
@@ -876,6 +944,131 @@
         .result-suggestions li i {
             color: var(--aurora-blue);
             margin-top: 3px;
+        }
+
+        /* 智能问答区域 */
+        .qa-section {
+            margin-top: 24px;
+            background: rgba(168, 85, 247, 0.05);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .qa-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .qa-header h4 {
+            font-size: 15px;
+        }
+
+        .qa-header .ai-badge {
+            padding: 4px 10px;
+            background: linear-gradient(135deg, var(--aurora-purple), var(--aurora-pink));
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .qa-chat {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+        }
+
+        .qa-message {
+            margin-bottom: 16px;
+            padding: 14px 18px;
+            border-radius: 14px;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .qa-message.user {
+            background: rgba(0, 212, 255, 0.1);
+            margin-left: 40px;
+        }
+
+        .qa-message.assistant {
+            background: rgba(168, 85, 247, 0.1);
+            margin-right: 40px;
+        }
+
+        .qa-input-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .qa-input {
+            flex: 1;
+            padding: 14px 18px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            font-size: 14px;
+            color: white;
+            font-family: inherit;
+        }
+
+        .qa-input:focus {
+            outline: none;
+            border-color: var(--aurora-purple);
+        }
+
+        .qa-send-btn {
+            padding: 14px 24px;
+            background: linear-gradient(135deg, var(--aurora-purple), var(--aurora-pink));
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .qa-send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .qa-related {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .qa-related-title {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 8px;
+        }
+
+        .qa-related-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .qa-skill-tag {
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .qa-skill-tag:hover {
+            background: rgba(168, 85, 247, 0.2);
+            border-color: var(--aurora-purple);
         }
 
         /* 详情面板 */
@@ -1467,36 +1660,6 @@
             opacity: 0.3;
         }
 
-        /* Tab 切换 */
-        .tabs {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 16px;
-            background: rgba(255,255,255,0.03);
-            padding: 4px;
-            border-radius: 10px;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 10px;
-            text-align: center;
-            border-radius: 8px;
-            font-size: 12px;
-            color: rgba(255,255,255,0.5);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .tab:hover {
-            color: white;
-        }
-
-        .tab.active {
-            background: rgba(168, 85, 247, 0.2);
-            color: white;
-        }
-
         /* 响应式 */
         @media (max-width: 768px) {
             .main-container { padding: 16px; }
@@ -1504,6 +1667,8 @@
             .skills-grid { grid-template-columns: 1fr; }
             .detail-panel, .favorites-panel { width: 100%; right: -100%; }
             .nav-tabs { display: none; }
+            .graph-top-bar { flex-direction: column; width: 90%; }
+            .graph-search-box { width: 100%; }
         }
 
         ::-webkit-scrollbar { width: 6px; }
@@ -1527,6 +1692,37 @@
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* 节点 tooltip */
+        .node-tooltip {
+            position: absolute;
+            padding: 12px 16px;
+            background: rgba(26, 26, 46, 0.98);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            font-size: 13px;
+            pointer-events: none;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            max-width: 250px;
+        }
+
+        .node-tooltip h4 {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .node-tooltip p {
+            font-size: 11px;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.5;
+        }
+
+        .node-tooltip .tooltip-meta {
+            margin-top: 8px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.4);
+        }
     </style>
 </head>
 <body>
@@ -1534,30 +1730,27 @@
     <div class="aurora"></div>
 
     <nav class="navbar">
-        <div class="nav-content">
-            <div class="logo">
-                <div class="logo-icon">🌌</div>
-                <div class="logo-text">
-                    <h1>Skillverse</h1>
-                    <p>技能宇宙</p>
-                </div>
+        <div class="logo">
+            <div class="logo-icon">🌌</div>
+            <div class="logo-text">
+                <h1>Skillverse</h1>
             </div>
-            <div class="nav-tabs">
-                <div class="nav-tab active" data-view="explore" onclick="switchView('explore')">
-                    <i class="fas fa-compass"></i> 探索
-                </div>
-                <div class="nav-tab" data-view="graph" onclick="switchView('graph')">
-                    <i class="fas fa-project-diagram"></i> 图谱
-                </div>
-                <div class="nav-tab" data-view="recommend" onclick="switchView('recommend')">
-                    <i class="fas fa-magic"></i> 推荐
-                </div>
+        </div>
+        <div class="nav-tabs">
+            <div class="nav-tab active" data-view="explore" onclick="switchView('explore')">
+                <i class="fas fa-compass"></i> 探索
             </div>
-            <div class="nav-actions">
-                <div class="nav-btn" onclick="toggleFavorites()">
-                    <i class="fas fa-star"></i> 收藏
-                    <span class="count" id="favCount">0</span>
-                </div>
+            <div class="nav-tab" data-view="graph" onclick="switchView('graph')">
+                <i class="fas fa-project-diagram"></i> 图谱
+            </div>
+            <div class="nav-tab" data-view="recommend" onclick="switchView('recommend')">
+                <i class="fas fa-magic"></i> 推荐
+            </div>
+        </div>
+        <div class="nav-actions">
+            <div class="nav-btn" onclick="toggleFavorites()">
+                <i class="fas fa-star"></i> 收藏
+                <span class="count" id="favCount">0</span>
             </div>
         </div>
     </nav>
@@ -1596,12 +1789,15 @@
             <div class="skills-grid" id="skillsGrid"></div>
         </div>
 
-        <!-- 图谱视图 -->
+        <!-- 图谱视图 - 全屏 -->
         <div class="view" id="graphView">
-            <div class="graph-container">
-                <div class="graph-search">
-                    <i class="fas fa-search graph-search-icon"></i>
-                    <input type="text" id="graphSearchInput" placeholder="搜索技能..." oninput="filterGraph()">
+            <div class="graph-fullscreen">
+                <div class="graph-top-bar">
+                    <div style="position: relative;">
+                        <i class="fas fa-search graph-search-icon"></i>
+                        <input type="text" class="graph-search-box" id="graphSearchInput" 
+                               placeholder="搜索技能..." oninput="filterGraph()">
+                    </div>
                     <select class="graph-filter" id="graphFilter" onchange="filterGraph()">
                         <option value="">全部分类</option>
                     </select>
@@ -1610,9 +1806,22 @@
                 <div class="graph-controls">
                     <div class="graph-btn" onclick="zoomIn()" title="放大"><i class="fas fa-plus"></i></div>
                     <div class="graph-btn" onclick="zoomOut()" title="缩小"><i class="fas fa-minus"></i></div>
-                    <div class="graph-btn" onclick="resetGraph()" title="重置"><i class="fas fa-sync-alt"></i></div>
+                    <div class="graph-btn" onclick="resetZoom()" title="重置"><i class="fas fa-expand"></i></div>
+                    <div class="graph-btn" onclick="toggleFullscreen()" title="全屏"><i class="fas fa-arrows-alt"></i></div>
                 </div>
                 <div class="graph-legend" id="graphLegend"></div>
+                <div class="graph-stats" id="graphStats">
+                    <div class="graph-stats-row">
+                        <div class="graph-stat">
+                            <div class="graph-stat-value" id="nodeCount">0</div>
+                            <div class="graph-stat-label">技能节点</div>
+                        </div>
+                        <div class="graph-stat">
+                            <div class="graph-stat-value" id="linkCount">0</div>
+                            <div class="graph-stat-label">关联连线</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1628,6 +1837,23 @@
                     </button>
                 </div>
                 <div id="recommendResult"></div>
+
+                <!-- 智能问答区域 -->
+                <div class="qa-section">
+                    <div class="qa-header">
+                        <h4><i class="fas fa-robot"></i> 智能问答</h4>
+                        <span class="ai-badge">讯飞星辰 AI</span>
+                    </div>
+                    <div class="qa-chat" id="qaChat"></div>
+                    <div class="qa-input-row">
+                        <input type="text" class="qa-input" id="qaInput" 
+                               placeholder="问我任何关于技能的问题..." 
+                               onkeypress="if(event.key==='Enter')sendQA()">
+                        <button class="qa-send-btn" onclick="sendQA()">
+                            <i class="fas fa-paper-plane"></i> 发送
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1655,6 +1881,9 @@
         <div class="favorites-body" id="favoritesBody"></div>
     </div>
 
+    <!-- 节点 Tooltip -->
+    <div class="node-tooltip" id="nodeTooltip" style="display: none;"></div>
+
     <script>
         let allSkills = [];
         let categories = [];
@@ -1666,6 +1895,8 @@
         let graphData = null;
         let simulation = null;
         let currentPathData = null;
+        let qaHistory = [];
+        let zoom = null;
 
         const userId = 'user_' + Date.now();
 
@@ -1865,7 +2096,6 @@
                 return;
             }
 
-            // 批量获取评分
             const ratingsPromises = skills.slice(0, 12).map(skill => 
                 fetch(`/api/ratings/${skill.id}`).then(r => r.json()).catch(() => ({ avgRating: 0, count: 0 }))
             );
@@ -1881,8 +2111,7 @@
                 const ratingCount = rating.count || 0;
 
                 return `
-                    <div class="skill-card" onclick="openSkill(${skill.id})"
-                         style="--icon-bg: linear-gradient(135deg, var(--aurora-purple), var(--aurora-pink))">
+                    <div class="skill-card" onclick="openSkill(${skill.id})">
                         <div class="skill-header">
                             <div class="skill-icon">${config.icon}</div>
                             <div class="skill-badges">
@@ -1936,15 +2165,12 @@
         async function loadSkillDetail(id) {
             const panelBody = document.getElementById('panelBody');
             
-            // 加载评分
             const ratingsRes = await fetch(`/api/ratings/${id}`);
             const ratingsData = await ratingsRes.json();
             
-            // 加载案例
             const casesRes = await fetch(`/api/cases/${id}`);
             const casesData = await casesRes.json();
             
-            // 加载笔记
             const notesRes = await fetch(`/api/notes/${id}`);
             const notesData = await notesRes.json();
             notes[id] = notesData;
@@ -2397,7 +2623,6 @@
                 const data = await res.json();
                 
                 if (data.success) {
-                    // 创建下载
                     const blob = new Blob([data.content], { type: data.mimeType });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -2408,6 +2633,68 @@
                 }
             } catch (e) {
                 console.error('导出失败:', e);
+            }
+        }
+
+        // 智能问答
+        async function sendQA() {
+            const input = document.getElementById('qaInput');
+            const question = input.value.trim();
+            if (!question) return;
+            
+            input.value = '';
+            
+            const chatContainer = document.getElementById('qaChat');
+            chatContainer.innerHTML += `
+                <div class="qa-message user">${question}</div>
+                <div class="qa-message assistant" id="qaLoading">
+                    <div class="loading-spinner" style="width:20px;height:20px;border-width:2px;"></div>
+                    思考中...
+                </div>
+            `;
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            try {
+                const res = await fetch('/api/qa', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question, history: qaHistory.slice(-4) })
+                });
+                const data = await res.json();
+                
+                // 移除加载动画
+                document.getElementById('qaLoading')?.remove();
+                
+                // 显示回答
+                let answerHtml = data.answer;
+                if (data.relatedSkills && data.relatedSkills.length > 0) {
+                    answerHtml += `
+                        <div class="qa-related">
+                            <div class="qa-related-title">相关技能：</div>
+                            <div class="qa-related-skills">
+                                ${data.relatedSkills.slice(0, 5).map(s => `
+                                    <span class="qa-skill-tag" onclick="openSkill(${s.id})">${s.title}</span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                chatContainer.innerHTML += `
+                    <div class="qa-message assistant">${answerHtml}</div>
+                `;
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                
+                // 保存历史
+                qaHistory.push({ question, answer: data.answer });
+                
+            } catch (e) {
+                document.getElementById('qaLoading')?.remove();
+                chatContainer.innerHTML += `
+                    <div class="qa-message assistant" style="color: #f87171;">
+                        网络错误，请稍后重试
+                    </div>
+                `;
             }
         }
 
@@ -2422,7 +2709,7 @@
 
         async function loadGraph() {
             try {
-                const res = await fetch('/api/graph?limit=80');
+                const res = await fetch('/api/graph?limit=100');
                 graphData = await res.json();
                 renderGraph();
             } catch (e) {
@@ -2432,60 +2719,81 @@
 
         function renderGraph() {
             const svg = d3.select('#graphSvg');
-            const container = document.querySelector('.graph-container');
+            const container = document.querySelector('.graph-fullscreen');
             const width = container.clientWidth;
             const height = container.clientHeight;
 
             svg.selectAll('*').remove();
 
+            // 更新统计
+            document.getElementById('nodeCount').textContent = graphData.nodes.length;
+            document.getElementById('linkCount').textContent = graphData.links.length;
+
             const nodes = graphData.nodes.map(n => ({
                 ...n,
-                radius: Math.max(6, Math.min(18, n.usage / 6000))
+                radius: Math.max(8, Math.min(20, n.usage / 5000))
             }));
 
             const links = graphData.links;
 
-            simulation = d3.forceSimulation(nodes)
-                .force('link', d3.forceLink(links).id(d => d.id).distance(80))
-                .force('charge', d3.forceManyBody().strength(-200))
-                .force('center', d3.forceCenter(width / 2, height / 2))
-                .force('collision', d3.forceCollide().radius(d => d.radius + 5));
+            // 创建缩放行为
+            zoom = d3.zoom()
+                .scaleExtent([0.3, 4])
+                .on('zoom', (event) => {
+                    g.attr('transform', event.transform);
+                });
 
-            const link = svg.append('g')
+            svg.call(zoom);
+
+            // 创建主容器
+            const g = svg.append('g');
+
+            // 力导向模拟
+            simulation = d3.forceSimulation(nodes)
+                .force('link', d3.forceLink(links).id(d => d.id).distance(100))
+                .force('charge', d3.forceManyBody().strength(-300))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(d => d.radius + 10));
+
+            // 绘制连线
+            const link = g.append('g')
                 .selectAll('line')
                 .data(links)
                 .enter().append('line')
-                .attr('stroke', 'rgba(168, 85, 247, 0.2)')
+                .attr('stroke', 'rgba(168, 85, 247, 0.15)')
                 .attr('stroke-width', 1.5);
 
-            const node = svg.append('g')
-                .selectAll('circle')
+            // 绘制节点
+            const node = g.append('g')
+                .selectAll('g')
                 .data(nodes)
-                .enter().append('circle')
-                .attr('r', d => d.radius)
-                .attr('fill', d => CATEGORY_CONFIG[d.category]?.color || '#64748b')
-                .attr('stroke', '#fff')
-                .attr('stroke-width', 2)
+                .enter().append('g')
                 .style('cursor', 'pointer')
-                .on('click', (event, d) => {
-                    switchView('explore');
-                    openSkill(d.id);
-                })
                 .call(d3.drag()
                     .on('start', dragStarted)
                     .on('drag', dragged)
                     .on('end', dragEnded));
 
-            const labels = svg.append('g')
-                .selectAll('text')
-                .data(nodes.filter(n => n.radius > 10))
-                .enter().append('text')
-                .text(d => d.name.length > 5 ? d.name.slice(0, 4) + '..' : d.name)
-                .attr('font-size', '9px')
-                .attr('fill', 'rgba(255,255,255,0.6)')
-                .attr('text-anchor', 'middle')
-                .attr('pointer-events', 'none');
+            // 节点圆圈
+            node.append('circle')
+                .attr('r', d => d.radius)
+                .attr('fill', d => CATEGORY_CONFIG[d.category]?.color || '#64748b')
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 2)
+                .on('mouseover', showTooltip)
+                .on('mouseout', hideTooltip)
+                .on('click', (event, d) => {
+                    switchView('explore');
+                    openSkill(d.id);
+                });
 
+            // 节点标签
+            node.append('text')
+                .attr('class', 'node-label')
+                .attr('dy', d => d.radius + 14)
+                .text(d => d.name.length > 6 ? d.name.slice(0, 5) + '..' : d.name);
+
+            // 模拟tick
             simulation.on('tick', () => {
                 link
                     .attr('x1', d => d.source.x)
@@ -2493,13 +2801,11 @@
                     .attr('x2', d => d.target.x)
                     .attr('y2', d => d.target.y);
 
-                node
-                    .attr('cx', d => d.x = Math.max(d.radius, Math.min(width - d.radius, d.x)))
-                    .attr('cy', d => d.y = Math.max(d.radius, Math.min(height - d.radius, d.y)));
-
-                labels
-                    .attr('x', d => d.x)
-                    .attr('y', d => d.y + d.radius + 10);
+                node.attr('transform', d => {
+                    d.x = Math.max(d.radius, Math.min(width - d.radius, d.x));
+                    d.y = Math.max(d.radius, Math.min(height - d.radius, d.y));
+                    return `translate(${d.x},${d.y})`;
+                });
             });
 
             renderGraphLegend();
@@ -2522,14 +2828,34 @@
             d.fy = null;
         }
 
+        function showTooltip(event, d) {
+            const tooltip = document.getElementById('nodeTooltip');
+            const config = CATEGORY_CONFIG[d.category] || { name: '其他' };
+            
+            tooltip.innerHTML = `
+                <h4>${d.name}</h4>
+                <p>分类：${config.name}</p>
+                <p>热度：${(d.usage / 1000).toFixed(1)}k</p>
+                <div class="tooltip-meta">点击查看详情</div>
+            `;
+            
+            tooltip.style.display = 'block';
+            tooltip.style.left = (event.pageX + 15) + 'px';
+            tooltip.style.top = (event.pageY - 10) + 'px';
+        }
+
+        function hideTooltip() {
+            document.getElementById('nodeTooltip').style.display = 'none';
+        }
+
         function renderGraphLegend() {
             const container = document.getElementById('graphLegend');
-            const items = Object.entries(CATEGORY_CONFIG).slice(0, 8);
+            const items = Object.entries(CATEGORY_CONFIG).slice(0, 10);
             
             container.innerHTML = `
                 <div class="legend-title">分类图例</div>
                 ${items.map(([id, config]) => `
-                    <div class="legend-item">
+                    <div class="legend-item" onclick="filterByCategory('${id}')">
                         <div class="legend-dot" style="background: ${config.color}"></div>
                         <span>${config.name}</span>
                     </div>
@@ -2537,30 +2863,46 @@
             `;
         }
 
-        function filterGraph() {
-            loadGraph();
+        function filterByCategory(categoryId) {
+            document.getElementById('graphFilter').value = categoryId;
+            filterGraph();
+        }
+
+        async function filterGraph() {
+            const search = document.getElementById('graphSearchInput').value;
+            const category = document.getElementById('graphFilter').value;
+            
+            try {
+                const params = new URLSearchParams({ limit: 100 });
+                if (category) params.append('category', category);
+                if (search) params.append('search', search);
+                
+                const res = await fetch(`/api/graph?${params}`);
+                graphData = await res.json();
+                renderGraph();
+            } catch (e) {
+                console.error('过滤图谱失败:', e);
+            }
         }
 
         function zoomIn() {
-            d3.select('#graphSvg').transition().duration(300).call(
-                d3.zoom().on('zoom', event => {
-                    d3.select('#graphSvg').selectAll('g').attr('transform', event.transform);
-                }).scaleBy, 1.3
-            );
+            d3.select('#graphSvg').transition().duration(300).call(zoom.scaleBy, 1.5);
         }
 
         function zoomOut() {
-            d3.select('#graphSvg').transition().duration(300).call(
-                d3.zoom().on('zoom', event => {
-                    d3.select('#graphSvg').selectAll('g').attr('transform', event.transform);
-                }).scaleBy, 0.7
-            );
+            d3.select('#graphSvg').transition().duration(300).call(zoom.scaleBy, 0.67);
         }
 
-        function resetGraph() {
-            document.getElementById('graphSearchInput').value = '';
-            document.getElementById('graphFilter').value = '';
-            loadGraph();
+        function resetZoom() {
+            d3.select('#graphSvg').transition().duration(300).call(zoom.transform, d3.zoomIdentity);
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
         }
 
         document.addEventListener('keydown', (e) => {
