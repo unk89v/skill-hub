@@ -3,38 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skill Hub - 发现你的超能力</title>
+    <title>Skillverse - 技能宇宙</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         :root {
-            --bg-primary: #0f0f1a;
-            --bg-secondary: #1a1a2e;
-            --bg-card: #16213e;
-            --text-primary: #ffffff;
-            --text-secondary: #a0aec0;
-            --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            --accent-blue: #667eea;
-            --accent-purple: #764ba2;
-            --accent-pink: #f093fb;
-            --glow-blue: rgba(102, 126, 234, 0.5);
-            --glow-purple: rgba(118, 75, 162, 0.5);
+            --cosmic-purple: #0a0a1a;
+            --nebula-blue: #1a1a3e;
+            --star-gold: #ffd700;
+            --aurora-pink: #ff6b9d;
+            --aurora-blue: #00d4ff;
+            --aurora-purple: #a855f7;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
+        
         body {
             font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
+            background: var(--cosmic-purple);
+            color: white;
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        /* 背景动画 */
-        .bg-gradient {
+        /* 星空背景 */
+        .starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* 流星 */
+        .shooting-star {
+            position: fixed;
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, white, transparent);
+            animation: shoot 3s ease-out infinite;
+            opacity: 0;
+        }
+
+        @keyframes shoot {
+            0% { transform: translateX(-100px) translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            100% { transform: translateX(calc(100vw + 100px)) translateY(300px); opacity: 0; }
+        }
+
+        /* 极光效果 */
+        .aurora {
             position: fixed;
             top: 0;
             left: 0;
@@ -43,204 +76,186 @@
             pointer-events: none;
             z-index: 0;
             background: 
-                radial-gradient(ellipse at 20% 20%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 80%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 50%, rgba(240, 147, 251, 0.08) 0%, transparent 50%);
-            animation: bgPulse 10s ease-in-out infinite;
+                radial-gradient(ellipse at 20% 0%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 0%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(255, 107, 157, 0.05) 0%, transparent 50%);
+            animation: aurora 15s ease-in-out infinite;
         }
 
-        @keyframes bgPulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.05); }
+        @keyframes aurora {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.1) rotate(5deg); opacity: 0.7; }
         }
 
-        /* 导航 */
-        .navbar {
+        /* 主容器 */
+        .container {
             position: relative;
-            z-index: 100;
-            padding: 16px 40px;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* 头部 */
+        header {
+            padding: 20px 0;
             display: flex;
             align-items: center;
             justify-content: space-between;
             border-bottom: 1px solid rgba(255,255,255,0.05);
-            backdrop-filter: blur(20px);
-            background: rgba(15, 15, 26, 0.8);
         }
 
-        .nav-brand {
+        .logo {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 16px;
         }
 
-        .nav-logo {
-            width: 42px;
-            height: 42px;
-            background: var(--accent-gradient);
-            border-radius: 12px;
+        .logo-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--aurora-pink), var(--aurora-purple), var(--aurora-blue));
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            box-shadow: 0 4px 20px var(--glow-purple);
+            font-size: 28px;
+            box-shadow: 
+                0 0 30px rgba(168, 85, 247, 0.5),
+                0 0 60px rgba(168, 85, 247, 0.3);
+            animation: pulse 3s ease-in-out infinite;
         }
 
-        .nav-title {
-            font-size: 22px;
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(168, 85, 247, 0.5), 0 0 60px rgba(168, 85, 247, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(168, 85, 247, 0.7), 0 0 80px rgba(168, 85, 247, 0.4); }
+        }
+
+        .logo-text h1 {
+            font-size: 28px;
             font-weight: 800;
-            background: var(--accent-gradient);
+            background: linear-gradient(135deg, white, var(--aurora-blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: -0.5px;
         }
 
-        .nav-subtitle {
-            font-size: 11px;
-            color: var(--text-secondary);
-            margin-top: -2px;
+        .logo-text p {
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 2px;
         }
 
-        .nav-tabs {
+        /* 统计条 */
+        .stats-bar {
             display: flex;
-            gap: 8px;
+            gap: 32px;
+            padding: 16px 24px;
             background: rgba(255,255,255,0.03);
-            padding: 6px;
-            border-radius: 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .nav-tab {
-            padding: 10px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .nav-tab:hover {
-            color: var(--text-primary);
-            background: rgba(255,255,255,0.05);
-        }
-
-        .nav-tab.active {
-            background: var(--accent-gradient);
-            color: white;
-            box-shadow: 0 4px 15px var(--glow-purple);
-        }
-
-        .nav-stats {
-            display: flex;
-            gap: 24px;
-        }
-
-        .stat-item {
+        .stat {
             text-align: center;
         }
 
         .stat-value {
-            font-size: 20px;
-            font-weight: 700;
-            background: var(--accent-gradient);
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--aurora-pink), var(--aurora-blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .stat-label {
             font-size: 11px;
-            color: var(--text-secondary);
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
         }
 
-        /* 主容器 */
-        .main-container {
-            position: relative;
-            z-index: 1;
-            padding: 24px 40px;
-            max-width: 1600px;
-            margin: 0 auto;
+        /* Hero 区域 */
+        .hero {
+            text-align: center;
+            padding: 60px 0 40px;
         }
 
-        /* 搜索区域 */
-        .search-section {
-            margin-bottom: 28px;
+        .hero h2 {
+            font-size: 48px;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 16px;
         }
 
-        .search-wrapper {
-            position: relative;
+        .hero h2 span {
+            background: linear-gradient(135deg, var(--aurora-pink), var(--aurora-purple), var(--aurora-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: rgba(255,255,255,0.5);
             max-width: 600px;
+            margin: 0 auto 32px;
+            line-height: 1.6;
         }
 
-        .search-input {
+        /* 搜索框 */
+        .search-container {
+            max-width: 700px;
+            margin: 0 auto 40px;
+            position: relative;
+        }
+
+        .search-box {
             width: 100%;
-            padding: 16px 24px 16px 56px;
-            background: var(--bg-card);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 16px;
-            font-size: 15px;
-            color: var(--text-primary);
+            padding: 20px 24px 20px 60px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            font-size: 16px;
+            color: white;
             transition: all 0.3s;
         }
 
-        .search-input:focus {
+        .search-box:focus {
             outline: none;
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15), 0 8px 30px rgba(0,0,0,0.3);
+            border-color: var(--aurora-purple);
+            background: rgba(255,255,255,0.08);
+            box-shadow: 0 0 40px rgba(168, 85, 247, 0.2);
         }
 
-        .search-input::placeholder {
-            color: var(--text-secondary);
+        .search-box::placeholder {
+            color: rgba(255,255,255,0.3);
         }
 
         .search-icon {
             position: absolute;
-            left: 20px;
+            left: 22px;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--text-secondary);
-            font-size: 18px;
+            font-size: 20px;
+            color: rgba(255,255,255,0.3);
         }
 
-        .search-hint {
-            margin-top: 12px;
+        /* 快捷标签 */
+        .quick-tags {
             display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .hint-tag {
-            padding: 6px 14px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 20px;
-            font-size: 12px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .hint-tag:hover {
-            background: rgba(102, 126, 234, 0.2);
-            color: var(--accent-blue);
-        }
-
-        /* 分类导航 */
-        .category-nav {
-            display: flex;
+            justify-content: center;
             gap: 12px;
-            margin-bottom: 24px;
             flex-wrap: wrap;
+            margin-bottom: 48px;
         }
 
-        .category-chip {
+        .quick-tag {
             padding: 10px 20px;
-            background: var(--bg-card);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 30px;
             font-size: 13px;
-            font-weight: 500;
-            color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.3s;
             display: flex;
@@ -248,37 +263,130 @@
             gap: 8px;
         }
 
-        .category-chip:hover {
-            border-color: var(--accent-blue);
+        .quick-tag:hover {
+            background: rgba(168, 85, 247, 0.2);
+            border-color: var(--aurora-purple);
             transform: translateY(-2px);
         }
 
-        .category-chip.active {
-            background: var(--accent-gradient);
+        .quick-tag i {
+            font-size: 14px;
+        }
+
+        /* 分类导航 */
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-bottom: 48px;
+        }
+
+        .category-card {
+            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .category-card:hover {
+            transform: translateY(-8px);
             border-color: transparent;
-            color: white;
-            box-shadow: 0 4px 20px var(--glow-purple);
         }
 
-        .category-chip .count {
-            padding: 2px 8px;
-            background: rgba(255,255,255,0.15);
-            border-radius: 10px;
-            font-size: 11px;
+        .category-card:hover::before {
+            opacity: 0.15;
         }
 
-        /* 技能网格 */
+        .category-card.active {
+            border-color: var(--aurora-purple);
+            background: rgba(168, 85, 247, 0.1);
+        }
+
+        .category-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .category-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .category-count {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 热门技能展示 */
+        .section-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .section-title h3 {
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title h3 i {
+            color: var(--star-gold);
+        }
+
+        .view-all {
+            font-size: 14px;
+            color: var(--aurora-blue);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .view-all:hover {
+            text-decoration: underline;
+        }
+
+        /* 技能卡片网格 */
         .skills-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
         }
 
         .skill-card {
-            background: var(--bg-card);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 20px;
-            padding: 24px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 24px;
+            padding: 28px;
             cursor: pointer;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
@@ -288,99 +396,121 @@
         .skill-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--accent-gradient);
-            transform: scaleX(0);
-            transition: transform 0.3s;
-        }
-
-        .skill-card:hover {
-            transform: translateY(-6px);
-            border-color: rgba(102, 126, 234, 0.3);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 40px var(--glow-blue);
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, var(--aurora-purple), transparent 30%);
+            opacity: 0;
+            animation: none;
+            transition: opacity 0.3s;
         }
 
         .skill-card:hover::before {
-            transform: scaleX(1);
+            opacity: 0.1;
+            animation: rotate 4s linear infinite;
         }
 
-        .skill-card.selected {
-            border-color: var(--accent-purple);
-            box-shadow: 0 0 0 2px var(--accent-purple), 0 20px 40px rgba(0,0,0,0.4);
+        @keyframes rotate {
+            to { transform: rotate(360deg); }
+        }
+
+        .skill-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            border-color: rgba(168, 85, 247, 0.5);
+            box-shadow: 
+                0 20px 60px rgba(0,0,0,0.4),
+                0 0 40px rgba(168, 85, 247, 0.2);
+        }
+
+        .skill-card-content {
+            position: relative;
+            z-index: 1;
         }
 
         .skill-header {
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
         }
 
         .skill-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: 14px;
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
-            background: var(--accent-gradient);
-            box-shadow: 0 4px 15px var(--glow-purple);
+            font-size: 28px;
+            background: var(--icon-bg);
+            box-shadow: 0 8px 24px var(--icon-shadow);
         }
 
         .skill-badges {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            gap: 6px;
+            gap: 8px;
         }
 
-        .badge-hot {
-            padding: 4px 10px;
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-            border-radius: 12px;
+        .badge-trending {
+            padding: 5px 12px;
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            border-radius: 20px;
             font-size: 10px;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-        }
-
-        .badge-usage {
-            font-size: 12px;
-            color: var(--text-secondary);
             display: flex;
             align-items: center;
             gap: 4px;
         }
 
-        .badge-usage i { color: #f59e0b; }
+        .badge-new {
+            padding: 5px 12px;
+            background: linear-gradient(135deg, var(--aurora-blue), var(--aurora-purple));
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .skill-usage {
+            font-size: 13px;
+            color: rgba(255,255,255,0.5);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .skill-usage i {
+            color: var(--star-gold);
+        }
 
         .skill-title {
-            font-size: 18px;
+            font-size: 22px;
             font-weight: 700;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             letter-spacing: -0.3px;
         }
 
         .skill-id {
             font-size: 11px;
             font-family: 'Monaco', monospace;
-            color: var(--text-secondary);
+            color: rgba(255,255,255,0.3);
             background: rgba(255,255,255,0.05);
-            padding: 3px 8px;
-            border-radius: 6px;
+            padding: 4px 10px;
+            border-radius: 8px;
             display: inline-block;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
 
         .skill-desc {
-            font-size: 13px;
-            line-height: 1.6;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
+            font-size: 14px;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 20px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -390,681 +520,540 @@
         .skill-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 16px;
+            gap: 8px;
+            margin-bottom: 20px;
         }
 
         .skill-tag {
-            padding: 5px 12px;
-            border-radius: 8px;
-            font-size: 11px;
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 12px;
             font-weight: 500;
+            background: var(--tag-bg);
+            color: var(--tag-color);
             transition: all 0.2s;
         }
 
         .skill-tag:hover {
-            transform: scale(1.05);
+            transform: scale(1.1);
         }
-
-        /* 标签颜色 - 更丰富的渐变 */
-        .tag-AI { background: linear-gradient(135deg, #667eea20, #764ba220); color: #a78bfa; }
-        .tag-搜索 { background: linear-gradient(135deg, #f59e0b20, #f9731620); color: #fbbf24; }
-        .tag-营销 { background: linear-gradient(135deg, #ef444420, #f9731620); color: #f87171; }
-        .tag-开发 { background: linear-gradient(135deg, #3b82f620, #06b6d420); color: #60a5fa; }
-        .tag-数据 { background: linear-gradient(135deg, #06b6d420, #10b98120); color: #22d3ee; }
-        .tag-自动化 { background: linear-gradient(135deg, #6366f120, #8b5cf620); color: #818cf8; }
-        .tag-设计 { background: linear-gradient(135deg, #ec489920, #f472b620); color: #f472b6; }
-        .tag-翻译 { background: linear-gradient(135deg, #f9731620, #fbbf2420); color: #fb923c; }
-        .tag-内容 { background: linear-gradient(135deg, #10b98120, #34d39920); color: #34d399; }
-        .tag-效率 { background: linear-gradient(135deg, #84cc1620, #a3e63520); color: #a3e635; }
-        .tag-社交 { background: linear-gradient(135deg, #f43f5e20, #fb718520); color: #fb7185; }
-        .tag-飞书 { background: linear-gradient(135deg, #0ea5e920, #38bdf820); color: #38bdf8; }
-        .tag-企业微信 { background: linear-gradient(135deg, #22c55e20, #4ade8020); color: #4ade80; }
-        .tag-微博 { background: linear-gradient(135deg, #f9731620, #ef444420); color: #fb923c; }
-        .tag-文档 { background: linear-gradient(135deg, #64748b20, #94a3b820); color: #94a3b8; }
-        .tag-写作 { background: linear-gradient(135deg, #a855f720, #c084fc20); color: #c084fc; }
-        .tag-图像 { background: linear-gradient(135deg, #ec489920, #f472b620); color: #f472b6; }
-        .tag-语音 { background: linear-gradient(135deg, #14b8a620, #2dd4bf20); color: #2dd4bf; }
-        .tag-视频 { background: linear-gradient(135deg, #f59e0b20, #fbbf2420); color: #fbbf24; }
-        .tag-测试 { background: linear-gradient(135deg, #64748b20, #47556920); color: #94a3b8; }
-        .tag-安全 { background: linear-gradient(135deg, #ef444420, #dc262620); color: #f87171; }
-        .tag-运维 { background: linear-gradient(135deg, #78716c20, #a8a29e20); color: #a8a29e; }
-        .tag-财务 { background: linear-gradient(135deg, #0ea5e920, #0284c720); color: #38bdf8; }
-        .tag-教育 { background: linear-gradient(135deg, #8b5cf620, #a78bfa20); color: #a78bfa; }
-        .tag-研究 { background: linear-gradient(135deg, #6366f120, #818cf820); color: #818cf8; }
-        .tag-学术 { background: linear-gradient(135deg, #3b82f620, #2563eb20); color: #60a5fa; }
-        .tag-代码 { background: linear-gradient(135deg, #1e293b20, #33415520); color: #cbd5e1; }
-        .tag-模型 { background: linear-gradient(135deg, #8b5cf620, #c084fc20); color: #a78bfa; }
-        .tag-聊天 { background: linear-gradient(135deg, #06b6d420, #22d3ee20); color: #22d3ee; }
-        .tag-机器人 { background: linear-gradient(135deg, #64748b20, #94a3b820); color: #94a3b8; }
-        .tag-ChatGPT { background: linear-gradient(135deg, #10b98120, #05966920); color: #34d399; }
-        .tag-开源 { background: linear-gradient(135deg, #f59e0b20, #d9770620); color: #fbbf24; }
-        .tag-API { background: linear-gradient(135deg, #3b82f620, #1d4ed820); color: #60a5fa; }
-        .tag-default { background: rgba(255,255,255,0.05); color: var(--text-secondary); }
 
         .skill-footer {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding-top: 16px;
+            padding-top: 20px;
             border-top: 1px solid rgba(255,255,255,0.06);
         }
 
         .skill-related {
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: 12px;
-            color: var(--text-secondary);
         }
 
-        .skill-related i { color: var(--accent-purple); }
+        .skill-related i {
+            color: var(--aurora-purple);
+        }
 
-        .skill-action {
-            padding: 8px 16px;
-            background: var(--accent-gradient);
-            border-radius: 10px;
-            font-size: 12px;
+        .skill-cta {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--aurora-purple), var(--aurora-pink));
+            border-radius: 12px;
+            font-size: 13px;
             font-weight: 600;
-            color: white;
             display: flex;
             align-items: center;
-            gap: 6px;
-            transition: all 0.2s;
+            gap: 8px;
+            transition: all 0.3s;
         }
 
-        .skill-card:hover .skill-action {
+        .skill-card:hover .skill-cta {
             transform: scale(1.05);
-            box-shadow: 0 4px 15px var(--glow-purple);
+            box-shadow: 0 8px 24px rgba(168, 85, 247, 0.4);
         }
 
-        /* 详情面板 */
-        .detail-panel {
+        /* 关联发现面板 */
+        .discovery-panel {
             position: fixed;
             top: 0;
-            right: -480px;
-            width: 480px;
+            right: -520px;
+            width: 520px;
             height: 100vh;
-            background: var(--bg-secondary);
+            background: linear-gradient(180deg, var(--nebula-blue), var(--cosmic-purple));
             border-left: 1px solid rgba(255,255,255,0.08);
-            z-index: 200;
-            transition: right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             overflow-y: auto;
         }
 
-        .detail-panel.open {
+        .discovery-panel.open {
             right: 0;
         }
 
-        .detail-header {
-            padding: 24px;
-            background: linear-gradient(180deg, rgba(102, 126, 234, 0.1), transparent);
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+        .panel-header {
+            padding: 32px;
+            background: linear-gradient(180deg, rgba(168, 85, 247, 0.1), transparent);
+            position: relative;
         }
 
-        .detail-close {
+        .panel-close {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 36px;
-            height: 36px;
+            top: 24px;
+            right: 24px;
+            width: 44px;
+            height: 44px;
             background: rgba(255,255,255,0.05);
-            border-radius: 10px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s;
         }
 
-        .detail-close:hover {
+        .panel-close:hover {
             background: rgba(255,255,255,0.1);
             transform: rotate(90deg);
         }
 
-        .detail-icon {
-            width: 72px;
-            height: 72px;
-            border-radius: 18px;
+        .panel-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
-            background: var(--accent-gradient);
-            box-shadow: 0 8px 30px var(--glow-purple);
-            margin-bottom: 16px;
+            font-size: 36px;
+            background: linear-gradient(135deg, var(--aurora-purple), var(--aurora-pink));
+            box-shadow: 0 12px 40px rgba(168, 85, 247, 0.4);
+            margin-bottom: 20px;
         }
 
-        .detail-title {
-            font-size: 26px;
+        .panel-title {
+            font-size: 32px;
             font-weight: 800;
             margin-bottom: 8px;
-            letter-spacing: -0.5px;
         }
 
-        .detail-id {
+        .panel-id {
             font-size: 12px;
             font-family: 'Monaco', monospace;
-            color: var(--text-secondary);
+            color: rgba(255,255,255,0.4);
             background: rgba(255,255,255,0.05);
-            padding: 4px 10px;
-            border-radius: 8px;
+            padding: 6px 12px;
+            border-radius: 10px;
             display: inline-block;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
 
-        .detail-url {
+        .panel-url {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: var(--accent-gradient);
-            border-radius: 12px;
-            font-size: 13px;
+            gap: 10px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, var(--aurora-purple), var(--aurora-blue));
+            border-radius: 14px;
+            font-size: 14px;
             font-weight: 600;
             color: white;
             text-decoration: none;
             transition: all 0.3s;
         }
 
-        .detail-url:hover {
+        .panel-url:hover {
             transform: scale(1.05);
-            box-shadow: 0 4px 20px var(--glow-purple);
+            box-shadow: 0 8px 30px rgba(168, 85, 247, 0.4);
         }
 
-        .detail-body {
-            padding: 24px;
+        .panel-body {
+            padding: 32px;
         }
 
-        .detail-section {
-            margin-bottom: 28px;
+        .panel-section {
+            margin-bottom: 32px;
         }
 
-        .detail-section-title {
-            font-size: 11px;
+        .panel-section-title {
+            font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-secondary);
-            margin-bottom: 12px;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 16px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
-        .detail-section-title::after {
+        .panel-section-title::after {
             content: '';
             flex: 1;
             height: 1px;
-            background: rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.1);
         }
 
-        .detail-desc {
-            font-size: 14px;
+        .panel-desc {
+            font-size: 15px;
             line-height: 1.8;
-            color: var(--text-secondary);
+            color: rgba(255,255,255,0.7);
         }
 
-        .detail-stats {
+        .panel-stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            gap: 16px;
         }
 
-        .stat-card {
+        .panel-stat {
             text-align: center;
-            padding: 16px;
-            background: var(--bg-card);
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.06);
+            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .stat-card-value {
-            font-size: 24px;
-            font-weight: 700;
-            background: var(--accent-gradient);
+        .panel-stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--aurora-pink), var(--aurora-blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .stat-card-label {
+        .panel-stat-label {
             font-size: 11px;
-            color: var(--text-secondary);
-            margin-top: 4px;
+            color: rgba(255,255,255,0.4);
+            margin-top: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .related-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
+        .related-skills {
+            display: grid;
+            gap: 12px;
         }
 
-        .related-chip {
-            padding: 10px 16px;
-            background: var(--bg-card);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 12px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
+        .related-skill {
             display: flex;
             align-items: center;
-            gap: 8px;
-        }
-
-        .related-chip:hover {
-            border-color: var(--accent-blue);
-            background: rgba(102, 126, 234, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .related-chip i {
-            color: var(--accent-purple);
-        }
-
-        /* 图谱视图 */
-        .graph-view {
-            display: none;
-            height: calc(100vh - 140px);
-            background: var(--bg-card);
-            border-radius: 20px;
+            gap: 16px;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.06);
-            position: relative;
-            overflow: hidden;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
-        .graph-view.active {
-            display: block;
+        .related-skill:hover {
+            background: rgba(168, 85, 247, 0.1);
+            border-color: var(--aurora-purple);
+            transform: translateX(8px);
         }
 
-        #graphSvg {
-            width: 100%;
-            height: 100%;
-        }
-
-        .graph-controls {
-            position: absolute;
-            bottom: 24px;
-            left: 24px;
-            display: flex;
-            gap: 10px;
-            z-index: 10;
-        }
-
-        .graph-btn {
-            width: 44px;
-            height: 44px;
-            background: var(--bg-secondary);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 12px;
+        .related-skill-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            color: var(--text-secondary);
-            transition: all 0.2s;
+            font-size: 20px;
+            background: linear-gradient(135deg, var(--aurora-purple), var(--aurora-pink));
         }
 
-        .graph-btn:hover {
-            border-color: var(--accent-blue);
-            color: var(--accent-blue);
-        }
-
-        .graph-legend {
-            position: absolute;
-            top: 24px;
-            right: 24px;
-            background: var(--bg-secondary);
-            padding: 16px 20px;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.08);
-            z-index: 10;
-        }
-
-        .legend-title {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-secondary);
-            margin-bottom: 12px;
-        }
-
-        .legend-items {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-        }
-
-        .legend-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
-
-        /* 提示框 */
-        .tooltip {
-            position: fixed;
-            background: rgba(26, 26, 46, 0.98);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 14px;
-            padding: 14px 18px;
-            font-size: 13px;
-            z-index: 1000;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s;
-            max-width: 280px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-        }
-
-        .tooltip.visible {
-            opacity: 1;
-        }
-
-        .tooltip-title {
-            font-weight: 700;
+        .related-skill-info h4 {
+            font-size: 15px;
+            font-weight: 600;
             margin-bottom: 4px;
         }
 
-        .tooltip-desc {
+        .related-skill-info p {
             font-size: 12px;
-            color: var(--text-secondary);
-            line-height: 1.5;
+            color: rgba(255,255,255,0.4);
         }
 
-        /* 加载状态 */
-        .loading {
-            text-align: center;
-            padding: 60px;
-            color: var(--text-secondary);
+        /* 探索路径 */
+        .explore-path {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 48px;
         }
 
-        .loading-spinner {
-            width: 48px;
-            height: 48px;
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top-color: var(--accent-blue);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* 空状态 */
-        .empty-state {
-            text-align: center;
-            padding: 80px 40px;
-            color: var(--text-secondary);
-        }
-
-        .empty-icon {
-            font-size: 64px;
+        .path-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: 20px;
-            opacity: 0.3;
         }
 
-        .empty-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 8px;
+        .path-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .path-header h3 i {
+            color: var(--aurora-blue);
+        }
+
+        .path-steps {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        .path-step {
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+
+        .path-node {
+            padding: 12px 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            font-size: 13px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .path-node:hover {
+            background: rgba(168, 85, 247, 0.2);
+            border-color: var(--aurora-purple);
+        }
+
+        .path-node.active {
+            background: linear-gradient(135deg, var(--aurora-purple), var(--aurora-pink));
+            border-color: transparent;
+        }
+
+        .path-arrow {
+            padding: 0 12px;
+            color: rgba(255,255,255,0.2);
         }
 
         /* 响应式 */
         @media (max-width: 768px) {
-            .navbar { padding: 12px 20px; }
-            .nav-tabs { display: none; }
-            .main-container { padding: 16px 20px; }
+            .container { padding: 0 16px; }
+            .hero h2 { font-size: 32px; }
             .skills-grid { grid-template-columns: 1fr; }
-            .detail-panel { width: 100%; right: -100%; }
+            .discovery-panel { width: 100%; right: -100%; }
+            .stats-bar { display: none; }
         }
 
         /* 滚动条 */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
     </style>
 </head>
 <body>
-    <div class="bg-gradient"></div>
+    <!-- 星空背景 -->
+    <div class="starfield" id="starfield"></div>
+    <div class="aurora"></div>
+    <div class="shooting-star" style="top: 20%; animation-delay: 0s;"></div>
+    <div class="shooting-star" style="top: 50%; animation-delay: 2s;"></div>
+    <div class="shooting-star" style="top: 70%; animation-delay: 4s;"></div>
 
-    <!-- 导航栏 -->
-    <nav class="navbar">
-        <div class="nav-brand">
-            <div class="nav-logo"><i class="fas fa-cube"></i></div>
-            <div>
-                <div class="nav-title">Skill Hub</div>
-                <div class="nav-subtitle">Discover Your Superpowers</div>
+    <div class="container">
+        <!-- 头部 -->
+        <header>
+            <div class="logo">
+                <div class="logo-icon">🌌</div>
+                <div class="logo-text">
+                    <h1>Skillverse</h1>
+                    <p>技能宇宙 · 发现无限可能</p>
+                </div>
             </div>
-        </div>
-        <div class="nav-tabs">
-            <div class="nav-tab active" data-view="explore" onclick="switchView('explore')">
-                <i class="fas fa-compass"></i> 探索
+            <div class="stats-bar">
+                <div class="stat">
+                    <div class="stat-value" id="totalSkills">0</div>
+                    <div class="stat-label">技能星球</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="totalCategories">0</div>
+                    <div class="stat-label">技能星系</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="totalConnections">0</div>
+                    <div class="stat-label">星际航道</div>
+                </div>
             </div>
-            <div class="nav-tab" data-view="graph" onclick="switchView('graph')">
-                <i class="fas fa-project-diagram"></i> 关系图谱
-            </div>
-            <div class="nav-tab" data-view="journey" onclick="switchView('journey')">
-                <i class="fas fa-route"></i> 技能路径
-            </div>
-        </div>
-        <div class="nav-stats">
-            <div class="stat-item">
-                <div class="stat-value" id="totalSkills">0</div>
-                <div class="stat-label">技能</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="totalCategories">0</div>
-                <div class="stat-label">分类</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="totalConnections">0</div>
-                <div class="stat-label">关联</div>
-            </div>
-        </div>
-    </nav>
+        </header>
 
-    <!-- 主内容 -->
-    <div class="main-container">
-        <!-- 探索视图 -->
-        <div id="exploreView">
+        <!-- Hero -->
+        <section class="hero">
+            <h2>探索 <span>技能宇宙</span></h2>
+            <p>每一个技能都是一颗星球，点击探索，发现意想不到的关联与可能</p>
+            
             <!-- 搜索 -->
-            <div class="search-section">
-                <div class="search-wrapper">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="search-input" id="searchInput" 
-                           placeholder="搜索技能、功能、场景... 例如：AI对话、数据分析、自动化">
-                </div>
-                <div class="search-hint">
-                    <span class="hint-tag" onclick="quickSearch('ChatGPT')">🤖 ChatGPT</span>
-                    <span class="hint-tag" onclick="quickSearch('飞书')">📄 飞书</span>
-                    <span class="hint-tag" onclick="quickSearch('企业微信')">💼 企业微信</span>
-                    <span class="hint-tag" onclick="quickSearch('翻译')">🌐 翻译</span>
-                    <span class="hint-tag" onclick="quickSearch('自动化')">⚡ 自动化</span>
-                </div>
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-box" id="searchInput" 
+                       placeholder="搜索技能、场景、目标... 例如：AI对话、自动化工作流、数据分析">
             </div>
 
-            <!-- 分类导航 -->
-            <div class="category-nav" id="categoryNav"></div>
+            <!-- 快捷标签 -->
+            <div class="quick-tags">
+                <div class="quick-tag" onclick="quickSearch('ChatGPT')">
+                    <i class="fas fa-robot"></i> ChatGPT
+                </div>
+                <div class="quick-tag" onclick="quickSearch('飞书')">
+                    <i class="fas fa-paper-plane"></i> 飞书
+                </div>
+                <div class="quick-tag" onclick="quickSearch('企业微信')">
+                    <i class="fas fa-building"></i> 企业微信
+                </div>
+                <div class="quick-tag" onclick="quickSearch('自动化')">
+                    <i class="fas fa-magic"></i> 自动化
+                </div>
+                <div class="quick-tag" onclick="quickSearch('翻译')">
+                    <i class="fas fa-language"></i> 翻译
+                </div>
+                <div class="quick-tag" onclick="quickSearch('数据分析')">
+                    <i class="fas fa-chart-bar"></i> 数据分析
+                </div>
+            </div>
+        </section>
 
-            <!-- 技能网格 -->
+        <!-- 分类 -->
+        <section class="categories" id="categories"></section>
+
+        <!-- 探索路径 -->
+        <div class="explore-path">
+            <div class="path-header">
+                <h3><i class="fas fa-route"></i> 推荐探索路径</h3>
+                <span style="color: rgba(255,255,255,0.4); font-size: 13px; cursor: pointer;">
+                    换一条 <i class="fas fa-sync-alt"></i>
+                </span>
+            </div>
+            <div class="path-steps" id="pathSteps">
+                <!-- 动态生成 -->
+            </div>
+        </div>
+
+        <!-- 热门技能 -->
+        <section>
+            <div class="section-title">
+                <h3><i class="fas fa-fire"></i> 热门技能星球</h3>
+                <div class="view-all">查看全部 <i class="fas fa-arrow-right"></i></div>
+            </div>
             <div class="skills-grid" id="skillsGrid"></div>
-        </div>
-
-        <!-- 图谱视图 -->
-        <div class="graph-view" id="graphView">
-            <svg id="graphSvg"></svg>
-            <div class="graph-controls">
-                <div class="graph-btn" onclick="resetGraph()" title="重置视图">
-                    <i class="fas fa-sync-alt"></i>
-                </div>
-                <div class="graph-btn" onclick="zoomIn()" title="放大">
-                    <i class="fas fa-plus"></i>
-                </div>
-                <div class="graph-btn" onclick="zoomOut()" title="缩小">
-                    <i class="fas fa-minus"></i>
-                </div>
-            </div>
-            <div class="graph-legend">
-                <div class="legend-title">分类</div>
-                <div class="legend-items" id="legendItems"></div>
-            </div>
-        </div>
-
-        <!-- 路径视图 -->
-        <div id="journeyView" style="display: none;">
-            <div style="background: var(--bg-card); border-radius: 20px; padding: 40px; text-align: center; border: 1px solid rgba(255,255,255,0.06);">
-                <div style="font-size: 64px; margin-bottom: 20px;">🗺️</div>
-                <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 12px;">技能路径规划</h2>
-                <p style="color: var(--text-secondary); margin-bottom: 24px; max-width: 500px; margin-left: auto; margin-right: auto;">
-                    输入你想实现的目标，AI 将为你推荐最优的技能学习路径
-                </p>
-                <input type="text" placeholder="例如：我想搭建一个AI客服系统" 
-                       style="width: 100%; max-width: 500px; padding: 16px 20px; background: var(--bg-primary); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; font-size: 15px; color: var(--text-primary);">
-                <button style="margin-top: 16px; padding: 14px 32px; background: var(--accent-gradient); border: none; border-radius: 12px; font-size: 15px; font-weight: 600; color: white; cursor: pointer;">
-                    生成路径
-                </button>
-            </div>
-        </div>
+        </section>
     </div>
 
-    <!-- 详情面板 -->
-    <div class="detail-panel" id="detailPanel">
-        <div class="detail-header">
-            <div class="detail-close" onclick="closeDetail()">
+    <!-- 发现面板 -->
+    <div class="discovery-panel" id="discoveryPanel">
+        <div class="panel-header">
+            <div class="panel-close" onclick="closePanel()">
                 <i class="fas fa-times"></i>
             </div>
-            <div class="detail-icon" id="detailIcon"><i class="fas fa-cube"></i></div>
-            <h2 class="detail-title" id="detailTitle">技能名称</h2>
-            <span class="detail-id" id="detailId">skill-id</span>
-            <a href="#" class="detail-url" id="detailUrl" target="_blank">
+            <div class="panel-icon" id="panelIcon">🚀</div>
+            <h2 class="panel-title" id="panelTitle">技能名称</h2>
+            <span class="panel-id" id="panelId">skill-id</span>
+            <a href="#" class="panel-url" id="panelUrl" target="_blank">
                 <i class="fas fa-external-link-alt"></i> 访问官网
             </a>
         </div>
-        <div class="detail-body" id="detailBody"></div>
-    </div>
-
-    <!-- 提示框 -->
-    <div class="tooltip" id="tooltip">
-        <div class="tooltip-title"></div>
-        <div class="tooltip-desc"></div>
+        <div class="panel-body" id="panelBody"></div>
     </div>
 
     <script>
-        // 数据
         let allSkills = [];
         let categories = [];
         let currentCategory = null;
         let selectedSkill = null;
-        let currentView = 'explore';
-        let graphSimulation = null;
 
         // 分类配置
         const CATEGORY_CONFIG = {
-            ai: { name: 'AI 智能', icon: 'fa-brain', color: '#8b5cf6' },
-            dev: { name: '开发工具', icon: 'fa-code', color: '#3b82f6' },
-            data: { name: '数据分析', icon: 'fa-chart-line', color: '#06b6d4' },
-            content: { name: '内容创作', icon: 'fa-pen-fancy', color: '#10b981' },
-            search: { name: '搜索发现', icon: 'fa-search', color: '#f59e0b' },
-            productivity: { name: '效率提升', icon: 'fa-rocket', color: '#ec4899' },
-            automation: { name: '自动化', icon: 'fa-cogs', color: '#6366f1' },
-            marketing: { name: '营销增长', icon: 'fa-bullhorn', color: '#ef4444' },
-            design: { name: '设计创意', icon: 'fa-palette', color: '#14b8a6' },
-            translation: { name: '翻译助手', icon: 'fa-language', color: '#f97316' },
-            education: { name: '教育学习', icon: 'fa-graduation-cap', color: '#84cc16' },
-            finance: { name: '财务金融', icon: 'fa-coins', color: '#0ea5e9' }
+            ai: { name: 'AI 智能', icon: '🧠', gradient: 'linear-gradient(135deg, #667eea, #764ba2)' },
+            dev: { name: '开发工具', icon: '💻', gradient: 'linear-gradient(135deg, #3b82f6, #06b6d4)' },
+            data: { name: '数据分析', icon: '📊', gradient: 'linear-gradient(135deg, #06b6d4, #10b981)' },
+            content: { name: '内容创作', icon: '✍️', gradient: 'linear-gradient(135deg, #10b981, #34d399)' },
+            search: { name: '搜索发现', icon: '🔍', gradient: 'linear-gradient(135deg, #f59e0b, #fbbf24)' },
+            productivity: { name: '效率提升', icon: '⚡', gradient: 'linear-gradient(135deg, #ec4899, #f472b6)' },
+            automation: { name: '自动化', icon: '🤖', gradient: 'linear-gradient(135deg, #6366f1, #818cf8)' },
+            marketing: { name: '营销增长', icon: '📢', gradient: 'linear-gradient(135deg, #ef4444, #f87171)' },
+            design: { name: '设计创意', icon: '🎨', gradient: 'linear-gradient(135deg, #14b8a6, #2dd4bf)' },
+            translation: { name: '翻译助手', icon: '🌐', gradient: 'linear-gradient(135deg, #f97316, #fb923c)' },
+            education: { name: '教育学习', icon: '📚', gradient: 'linear-gradient(135deg, #84cc16, #a3e635)' },
+            finance: { name: '财务金融', icon: '💰', gradient: 'linear-gradient(135deg, #0ea5e9, #38bdf8)' }
+        };
+
+        // 标签颜色
+        const TAG_COLORS = {
+            'AI': { bg: 'rgba(168, 85, 247, 0.2)', color: '#c084fc' },
+            'ChatGPT': { bg: 'rgba(16, 185, 129, 0.2)', color: '#34d399' },
+            '搜索': { bg: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24' },
+            '飞书': { bg: 'rgba(14, 165, 233, 0.2)', color: '#38bdf8' },
+            '企业微信': { bg: 'rgba(34, 197, 94, 0.2)', color: '#4ade80' },
+            '微博': { bg: 'rgba(239, 68, 68, 0.2)', color: '#f87171' },
+            '自动化': { bg: 'rgba(99, 102, 241, 0.2)', color: '#818cf8' },
+            '翻译': { bg: 'rgba(249, 115, 22, 0.2)', color: '#fb923c' },
+            '数据': { bg: 'rgba(6, 182, 212, 0.2)', color: '#22d3ee' },
+            '营销': { bg: 'rgba(236, 72, 153, 0.2)', color: '#f472b6' }
         };
 
         // 技能官网
         const SKILL_URLS = {
             'baidu-search': 'https://www.baidu.com',
             'baidu-scholar-search': 'https://xueshu.baidu.com',
-            'baidu-baike-data': 'https://baike.baidu.com',
             'weibo-hot-search': 'https://s.weibo.com/top/summary',
             'weibo-search': 'https://weibo.com',
-            'weibo-crowd': 'https://weibo.com',
-            'weibo-status': 'https://weibo.com',
             'feishu-doc': 'https://www.feishu.cn',
-            'feishu-wiki': 'https://www.feishu.cn',
-            'feishu-drive': 'https://www.feishu.cn',
-            'feishu-bitable': 'https://www.feishu.cn',
-            'wecom-doc-manager': 'https://work.weixin.qq.com',
-            'wecom-smartsheet': 'https://work.weixin.qq.com',
-            'wecom-schedule': 'https://work.weixin.qq.com',
             'wecom-meeting': 'https://work.weixin.qq.com',
-            'wecom-msg': 'https://work.weixin.qq.com',
-            'wecom-todo': 'https://work.weixin.qq.com',
-            'wecom-contact': 'https://work.weixin.qq.com',
-            'deepresearch-conversation': 'https://yiyan.baidu.com',
-            'web_fetch': 'https://github.com/openclaw',
-            'weather': 'https://wttr.in',
-            'clawhub': 'https://clawhub.com',
             'chatgpt-api': 'https://platform.openai.com',
-            'gpt-vision': 'https://platform.openai.com',
-            'dall-e': 'https://openai.com/dall-e-3',
-            'stable-diffusion': 'https://stability.ai',
-            'midjourney': 'https://www.midjourney.com',
             'langchain': 'https://www.langchain.com',
-            'llamaindex': 'https://www.llamaindex.ai',
-            'huggingface': 'https://huggingface.co',
-            'github-copilot': 'https://github.com/features/copilot'
+            'clawhub': 'https://clawhub.com'
         };
 
-        // 详细描述
-        const SKILL_DESCRIPTIONS = {
-            'baidu-search': '百度AI搜索是一种智能搜索服务，能够理解用户意图，提供精准的搜索结果。支持自然语言查询，可根据上下文进行语义理解，让搜索更加智能化。',
-            'deepresearch-conversation': '百度提供的深度研究对话能力，支持多轮对话进行深度研究和分析，适合复杂问题的逐步探索，让AI成为你的研究助手。',
-            'feishu-doc': '飞书文档是字节跳动旗下的在线协作文档工具，支持多人实时编辑、评论、版本管理等功能，提供完整的API接口进行文档自动化操作。',
-            'wecom-meeting': '企业微信会议提供企业级视频会议服务，支持预约会议、邀请成员、会议录制等功能，可与企业通讯录深度集成，一键发起会议。',
-            'chatgpt-api': 'OpenAI ChatGPT API提供强大的对话生成能力，支持GPT-4、GPT-4-turbo等最新模型，可用于构建智能对话、内容生成、代码辅助等应用。',
-            'langchain': 'LangChain是一个开源框架，用于构建基于大语言模型(LLM)的应用程序，提供了链式调用、记忆管理、工具集成、Agent等核心能力。',
-            'clawhub': 'ClawHub是AI技能市场平台，提供技能的搜索、安装、更新和发布功能，帮助开发者快速集成AI能力，打造智能应用。'
-        };
+        // 创建星空
+        function createStars() {
+            const starfield = document.getElementById('starfield');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = Math.random() * 3 + 1 + 'px';
+                star.style.height = star.style.width;
+                star.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+                star.style.animationDelay = Math.random() * 5 + 's';
+                starfield.appendChild(star);
+            }
+        }
 
         // 初始化
         async function init() {
+            createStars();
+            
             try {
                 const res = await fetch('/api/skills');
                 const data = await res.json();
                 categories = data.categories;
                 allSkills = data.skills;
 
-                // 计算关联数
                 const connections = allSkills.reduce((sum, s) => sum + s.related.length, 0);
-
                 document.getElementById('totalSkills').textContent = allSkills.length;
                 document.getElementById('totalCategories').textContent = categories.length;
                 document.getElementById('totalConnections').textContent = connections;
 
                 renderCategories();
                 renderSkills(allSkills);
+                renderPath();
             } catch (e) {
                 console.error('加载失败:', e);
-            }
-        }
-
-        // 切换视图
-        function switchView(view) {
-            currentView = view;
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.classList.toggle('active', tab.dataset.view === view);
-            });
-
-            document.getElementById('exploreView').style.display = view === 'explore' ? 'block' : 'none';
-            document.getElementById('graphView').classList.toggle('active', view === 'graph');
-            document.getElementById('journeyView').style.display = view === 'journey' ? 'block' : 'none';
-
-            if (view === 'graph') {
-                setTimeout(renderGraph, 100);
             }
         }
 
@@ -1076,26 +1065,28 @@
 
         // 渲染分类
         function renderCategories() {
-            const container = document.getElementById('categoryNav');
+            const container = document.getElementById('categories');
             
             let html = `
-                <div class="category-chip ${!currentCategory ? 'active' : ''}" onclick="selectCategory(null)">
-                    <i class="fas fa-globe"></i>
-                    全部
-                    <span class="count">${allSkills.length}</span>
+                <div class="category-card ${!currentCategory ? 'active' : ''}" 
+                     onclick="selectCategory(null)"
+                     style="--gradient: linear-gradient(135deg, #667eea, #764ba2)">
+                    <div class="category-icon">🌌</div>
+                    <div class="category-name">全部</div>
+                    <div class="category-count">${allSkills.length} 个技能</div>
                 </div>
             `;
 
-            categories.forEach(cat => {
+            categories.slice(0, 11).forEach(cat => {
                 const count = allSkills.filter(s => s.category === cat.id).length;
-                const config = CATEGORY_CONFIG[cat.id] || { name: cat.name, icon: 'fa-cube', color: '#64748b' };
+                const config = CATEGORY_CONFIG[cat.id] || { name: cat.name, icon: '⭐', gradient: 'linear-gradient(135deg, #64748b, #94a3b8)' };
                 html += `
-                    <div class="category-chip ${currentCategory === cat.id ? 'active' : ''}" 
+                    <div class="category-card ${currentCategory === cat.id ? 'active' : ''}" 
                          onclick="selectCategory('${cat.id}')"
-                         style="--cat-color: ${config.color}">
-                        <i class="fas ${config.icon}"></i>
-                        ${config.name}
-                        <span class="count">${count}</span>
+                         style="--gradient: ${config.gradient}">
+                        <div class="category-icon">${config.icon}</div>
+                        <div class="category-name">${config.name}</div>
+                        <div class="category-count">${count} 个技能</div>
                     </div>
                 `;
             });
@@ -1112,6 +1103,10 @@
         }
 
         // 搜索
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchSkills(e.target.value);
+        });
+
         function searchSkills(query) {
             if (!query.trim()) {
                 const filtered = currentCategory ? allSkills.filter(s => s.category === currentCategory) : allSkills;
@@ -1131,34 +1126,33 @@
             renderSkills(results);
         }
 
-        // 相关性分数
         function getRelevanceScore(skill, query) {
             let score = 0;
             const q = query.toLowerCase();
             if (skill.title.toLowerCase() === q) score += 100;
             else if (skill.title.toLowerCase().includes(q)) score += 50;
             if (skill.name.toLowerCase().includes(q)) score += 40;
-            skill.tags.forEach(tag => {
-                if (tag.toLowerCase() === q) score += 30;
-                else if (tag.toLowerCase().includes(q)) score += 15;
+            skill.tags.forEach(t => {
+                if (t.toLowerCase() === q) score += 30;
+                else if (t.toLowerCase().includes(q)) score += 15;
             });
             if (skill.desc.toLowerCase().includes(q)) score += 10;
             return score;
         }
 
-        // 获取标签类
-        function getTagClass(tag) {
-            const map = {
-                'AI': 'tag-AI', '搜索': 'tag-搜索', '营销': 'tag-营销', '开发': 'tag-开发',
-                '数据': 'tag-数据', '自动化': 'tag-自动化', '设计': 'tag-设计', '翻译': 'tag-翻译',
-                '内容': 'tag-内容', '效率': 'tag-效率', '社交': 'tag-社交', '飞书': 'tag-飞书',
-                '企业微信': 'tag-企业微信', '微博': 'tag-微博', '文档': 'tag-文档', '写作': 'tag-写作',
-                '图像': 'tag-图像', '语音': 'tag-语音', '视频': 'tag-视频', '测试': 'tag-测试',
-                '安全': 'tag-安全', '运维': 'tag-运维', '财务': 'tag-财务', '教育': 'tag-教育',
-                '研究': 'tag-研究', '学术': 'tag-学术', '代码': 'tag-代码', '模型': 'tag-模型',
-                '聊天': 'tag-聊天', '机器人': 'tag-机器人', 'ChatGPT': 'tag-ChatGPT', '开源': 'tag-开源', 'API': 'tag-API'
-            };
-            return map[tag] || 'tag-default';
+        // 渲染探索路径
+        function renderPath() {
+            const topSkills = allSkills.sort((a, b) => b.usage - a.usage).slice(0, 5);
+            const container = document.getElementById('pathSteps');
+            
+            container.innerHTML = topSkills.map((skill, i) => `
+                <div class="path-step">
+                    <div class="path-node ${i === 0 ? 'active' : ''}" onclick="openSkill(${skill.id})">
+                        ${i + 1}. ${skill.title}
+                    </div>
+                    ${i < topSkills.length - 1 ? '<div class="path-arrow">→</div>' : ''}
+                </div>
+            `).join('');
         }
 
         // 渲染技能
@@ -1167,49 +1161,52 @@
 
             if (skills.length === 0) {
                 container.innerHTML = `
-                    <div class="empty-state" style="grid-column: 1/-1;">
-                        <div class="empty-icon"><i class="fas fa-search"></i></div>
-                        <div class="empty-title">没有找到匹配的技能</div>
-                        <p>试试其他关键词或分类</p>
+                    <div style="grid-column: 1/-1; text-align: center; padding: 60px; color: rgba(255,255,255,0.4);">
+                        <div style="font-size: 64px; margin-bottom: 20px;">🔭</div>
+                        <div style="font-size: 20px;">未发现匹配的技能星球</div>
                     </div>
                 `;
                 return;
             }
 
-            container.innerHTML = skills.map(skill => {
-                const isHot = skill.usage > 50000;
+            container.innerHTML = skills.slice(0, 12).map(skill => {
+                const config = CATEGORY_CONFIG[skill.category] || { icon: '⭐', gradient: 'linear-gradient(135deg, #64748b, #94a3b8)' };
+                const isTrending = skill.usage > 50000;
+                const isNew = Math.random() > 0.8;
                 const url = SKILL_URLS[skill.name];
-                const relatedCount = skill.related.length;
 
                 return `
-                    <div class="skill-card ${selectedSkill?.id === skill.id ? 'selected' : ''}" 
-                         onclick="selectSkill(${skill.id})">
-                        <div class="skill-header">
-                            <div class="skill-icon">
-                                <i class="fas fa-cube"></i>
+                    <div class="skill-card" onclick="openSkill(${skill.id})"
+                         style="--icon-bg: ${config.gradient}; --icon-shadow: rgba(168, 85, 247, 0.3)">
+                        <div class="skill-card-content">
+                            <div class="skill-header">
+                                <div class="skill-icon">${config.icon}</div>
+                                <div class="skill-badges">
+                                    ${isTrending ? '<div class="badge-trending"><i class="fas fa-fire"></i> 热门</div>' : ''}
+                                    ${isNew ? '<div class="badge-new">NEW</div>' : ''}
+                                    <div class="skill-usage">
+                                        <i class="fas fa-star"></i>
+                                        ${(skill.usage / 1000).toFixed(1)}k
+                                    </div>
+                                </div>
                             </div>
-                            <div class="skill-badges">
-                                ${isHot ? '<span class="badge-hot">🔥 Hot</span>' : ''}
-                                <span class="badge-usage">
-                                    <i class="fas fa-fire"></i>
-                                    ${(skill.usage / 1000).toFixed(1)}k
-                                </span>
+                            <h3 class="skill-title">${skill.title}</h3>
+                            <span class="skill-id">${skill.name}</span>
+                            <p class="skill-desc">${skill.desc}</p>
+                            <div class="skill-tags">
+                                ${skill.tags.slice(0, 4).map(t => {
+                                    const color = TAG_COLORS[t] || { bg: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.6)' };
+                                    return `<span class="skill-tag" style="--tag-bg: ${color.bg}; --tag-color: ${color.color}">${t}</span>`;
+                                }).join('')}
                             </div>
-                        </div>
-                        <h3 class="skill-title">${skill.title}</h3>
-                        <span class="skill-id">${skill.name}</span>
-                        <p class="skill-desc">${skill.desc}</p>
-                        <div class="skill-tags">
-                            ${skill.tags.slice(0, 4).map(t => `<span class="skill-tag ${getTagClass(t)}">${t}</span>`).join('')}
-                        </div>
-                        <div class="skill-footer">
-                            <div class="skill-related">
-                                <i class="fas fa-link"></i>
-                                ${relatedCount} 个关联技能
-                            </div>
-                            <div class="skill-action">
-                                <i class="fas fa-arrow-right"></i>
-                                详情
+                            <div class="skill-footer">
+                                <div class="skill-related">
+                                    <i class="fas fa-link"></i>
+                                    ${skill.related.length} 个关联技能
+                                </div>
+                                <div class="skill-cta">
+                                    探索 <i class="fas fa-arrow-right"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1217,26 +1214,17 @@
             }).join('');
         }
 
-        // 选择技能
-        function selectSkill(id) {
+        // 打开技能
+        function openSkill(id) {
             selectedSkill = allSkills.find(s => s.id === id);
-            openDetail(selectedSkill);
+            const config = CATEGORY_CONFIG[selectedSkill.category] || { icon: '⭐' };
             
-            const filtered = currentCategory ? allSkills.filter(s => s.category === currentCategory) : allSkills;
-            renderSkills(filtered);
-        }
-
-        // 打开详情
-        function openDetail(skill) {
-            const panel = document.getElementById('detailPanel');
-            const config = CATEGORY_CONFIG[skill.category] || { icon: 'fa-cube', color: '#64748b' };
+            document.getElementById('panelIcon').textContent = config.icon;
+            document.getElementById('panelTitle').textContent = selectedSkill.title;
+            document.getElementById('panelId').textContent = selectedSkill.name;
             
-            document.getElementById('detailIcon').innerHTML = `<i class="fas ${config.icon}"></i>`;
-            document.getElementById('detailTitle').textContent = skill.title;
-            document.getElementById('detailId').textContent = skill.name;
-            
-            const url = SKILL_URLS[skill.name];
-            const urlEl = document.getElementById('detailUrl');
+            const url = SKILL_URLS[selectedSkill.name];
+            const urlEl = document.getElementById('panelUrl');
             if (url) {
                 urlEl.href = url;
                 urlEl.style.display = 'inline-flex';
@@ -1244,256 +1232,80 @@
                 urlEl.style.display = 'none';
             }
 
-            const related = skill.related
+            const related = selectedSkill.related
                 .map(id => allSkills.find(s => s.id === id))
                 .filter(Boolean)
-                .slice(0, 8);
+                .slice(0, 6);
 
-            const fullDesc = SKILL_DESCRIPTIONS[skill.name] || skill.desc;
-
-            document.getElementById('detailBody').innerHTML = `
-                <div class="detail-section">
-                    <div class="detail-section-title">简介</div>
-                    <p class="detail-desc">${fullDesc}</p>
+            document.getElementById('panelBody').innerHTML = `
+                <div class="panel-section">
+                    <div class="panel-section-title">简介</div>
+                    <p class="panel-desc">${selectedSkill.desc} 这个技能可以帮助你快速实现相关功能，提升工作效率。</p>
                 </div>
                 
-                <div class="detail-section">
-                    <div class="detail-section-title">数据</div>
-                    <div class="detail-stats">
-                        <div class="stat-card">
-                            <div class="stat-card-value">${(skill.usage / 1000).toFixed(1)}k</div>
-                            <div class="stat-card-label">使用次数</div>
+                <div class="panel-section">
+                    <div class="panel-section-title">数据</div>
+                    <div class="panel-stats">
+                        <div class="panel-stat">
+                            <div class="panel-stat-value">${(selectedSkill.usage / 1000).toFixed(1)}k</div>
+                            <div class="panel-stat-label">使用次数</div>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-card-value">${skill.tags.length}</div>
-                            <div class="stat-card-label">标签</div>
+                        <div class="panel-stat">
+                            <div class="panel-stat-value">${selectedSkill.tags.length}</div>
+                            <div class="panel-stat-label">标签</div>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-card-value">${skill.related.length}</div>
-                            <div class="stat-card-label">关联</div>
+                        <div class="panel-stat">
+                            <div class="panel-stat-value">${selectedSkill.related.length}</div>
+                            <div class="panel-stat-label">关联</div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="detail-section">
-                    <div class="detail-section-title">标签</div>
+                <div class="panel-section">
+                    <div class="panel-section-title">标签</div>
                     <div class="skill-tags">
-                        ${skill.tags.map(t => `<span class="skill-tag ${getTagClass(t)}">${t}</span>`).join('')}
+                        ${selectedSkill.tags.map(t => {
+                            const color = TAG_COLORS[t] || { bg: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.6)' };
+                            return `<span class="skill-tag" style="--tag-bg: ${color.bg}; --tag-color: ${color.color}">${t}</span>`;
+                        }).join('')}
                     </div>
                 </div>
                 
                 ${related.length > 0 ? `
-                <div class="detail-section">
-                    <div class="detail-section-title">关联技能</div>
-                    <div class="related-grid">
-                        ${related.map(s => `
-                            <div class="related-chip" onclick="selectSkill(${s.id})">
-                                <i class="fas fa-link"></i>
-                                ${s.title}
-                            </div>
-                        `).join('')}
+                <div class="panel-section">
+                    <div class="panel-section-title">关联技能星球</div>
+                    <p style="font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 16px;">
+                        点击探索相关技能，发现更多可能 ✨
+                    </p>
+                    <div class="related-skills">
+                        ${related.map(s => {
+                            const c = CATEGORY_CONFIG[s.category] || { icon: '⭐' };
+                            return `
+                                <div class="related-skill" onclick="openSkill(${s.id})">
+                                    <div class="related-skill-icon">${c.icon}</div>
+                                    <div class="related-skill-info">
+                                        <h4>${s.title}</h4>
+                                        <p>${s.desc.substring(0, 30)}...</p>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
                     </div>
                 </div>
                 ` : ''}
             `;
 
-            panel.classList.add('open');
+            document.getElementById('discoveryPanel').classList.add('open');
         }
 
-        // 关闭详情
-        function closeDetail() {
-            document.getElementById('detailPanel').classList.remove('open');
+        // 关闭面板
+        function closePanel() {
+            document.getElementById('discoveryPanel').classList.remove('open');
         }
 
-        // 渲染图谱
-        function renderGraph() {
-            const svg = d3.select('#graphSvg');
-            const container = document.getElementById('graphView');
-            const width = container.clientWidth;
-            const height = container.clientHeight;
-
-            svg.selectAll('*').remove();
-
-            // 选择热门技能
-            const topSkills = allSkills
-                .sort((a, b) => b.usage - a.usage)
-                .slice(0, 60);
-
-            // 构建节点
-            const nodes = topSkills.map(s => ({
-                id: s.id,
-                name: s.title,
-                category: s.category,
-                usage: s.usage,
-                radius: Math.max(8, Math.min(24, s.usage / 5000))
-            }));
-
-            // 构建链接
-            const links = [];
-            topSkills.forEach(skill => {
-                skill.related.forEach(rid => {
-                    const target = nodes.find(n => n.id === rid);
-                    if (target && skill.id < rid) {
-                        links.push({ source: skill.id, target: rid });
-                    }
-                });
-            });
-
-            // 定义渐变
-            const defs = svg.append('defs');
-            Object.entries(CATEGORY_CONFIG).forEach(([id, config]) => {
-                const gradient = defs.append('radialGradient')
-                    .attr('id', `grad-${id}`)
-                    .attr('cx', '30%').attr('cy', '30%');
-                gradient.append('stop').attr('offset', '0%').attr('stop-color', config.color).attr('stop-opacity', 1);
-                gradient.append('stop').attr('offset', '100%').attr('stop-color', config.color).attr('stop-opacity', 0.6);
-            });
-
-            // 创建力导向
-            graphSimulation = d3.forceSimulation(nodes)
-                .force('link', d3.forceLink(links).id(d => d.id).distance(100))
-                .force('charge', d3.forceManyBody().strength(-300))
-                .force('center', d3.forceCenter(width / 2, height / 2))
-                .force('collision', d3.forceCollide().radius(d => d.radius + 8));
-
-            // 绘制链接
-            const link = svg.append('g')
-                .selectAll('line')
-                .data(links)
-                .enter().append('line')
-                .attr('stroke', 'rgba(102, 126, 234, 0.2)')
-                .attr('stroke-width', 1.5);
-
-            // 绘制节点
-            const node = svg.append('g')
-                .selectAll('circle')
-                .data(nodes)
-                .enter().append('circle')
-                .attr('r', d => d.radius)
-                .attr('fill', d => `url(#grad-${d.category})`)
-                .attr('stroke', '#fff')
-                .attr('stroke-width', 2)
-                .style('cursor', 'pointer')
-                .style('filter', 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))')
-                .on('mouseover', showTooltip)
-                .on('mouseout', hideTooltip)
-                .on('click', (event, d) => {
-                    switchView('explore');
-                    selectSkill(d.id);
-                })
-                .call(d3.drag()
-                    .on('start', dragStarted)
-                    .on('drag', dragged)
-                    .on('end', dragEnded));
-
-            // 标签
-            const labels = svg.append('g')
-                .selectAll('text')
-                .data(nodes.filter(n => n.radius > 14))
-                .enter().append('text')
-                .text(d => d.name.length > 6 ? d.name.slice(0, 5) + '...' : d.name)
-                .attr('font-size', '10px')
-                .attr('fill', 'rgba(255,255,255,0.7)')
-                .attr('text-anchor', 'middle')
-                .attr('pointer-events', 'none');
-
-            graphSimulation.on('tick', () => {
-                link
-                    .attr('x1', d => d.source.x)
-                    .attr('y1', d => d.source.y)
-                    .attr('x2', d => d.target.x)
-                    .attr('y2', d => d.target.y);
-
-                node
-                    .attr('cx', d => d.x = Math.max(d.radius + 20, Math.min(width - d.radius - 20, d.x)))
-                    .attr('cy', d => d.y = Math.max(d.radius + 20, Math.min(height - d.radius - 20, d.y)));
-
-                labels
-                    .attr('x', d => d.x)
-                    .attr('y', d => d.y + d.radius + 14);
-            });
-
-            renderLegend();
-        }
-
-        // 拖拽函数
-        function dragStarted(event, d) {
-            if (!event.active) graphSimulation.alphaTarget(0.3).restart();
-            d.fx = d.x;
-            d.fy = d.y;
-        }
-
-        function dragged(event, d) {
-            d.fx = event.x;
-            d.fy = event.y;
-        }
-
-        function dragEnded(event, d) {
-            if (!event.active) graphSimulation.alphaTarget(0);
-            d.fx = null;
-            d.fy = null;
-        }
-
-        // 显示提示
-        function showTooltip(event, d) {
-            const tooltip = document.getElementById('tooltip');
-            const skill = allSkills.find(s => s.id === d.id);
-            tooltip.querySelector('.tooltip-title').textContent = d.name;
-            tooltip.querySelector('.tooltip-desc').textContent = skill?.desc || '';
-            tooltip.style.left = event.pageX + 15 + 'px';
-            tooltip.style.top = event.pageY - 10 + 'px';
-            tooltip.classList.add('visible');
-        }
-
-        // 隐藏提示
-        function hideTooltip() {
-            document.getElementById('tooltip').classList.remove('visible');
-        }
-
-        // 重置图谱
-        function resetGraph() {
-            renderGraph();
-        }
-
-        // 放大
-        function zoomIn() {
-            const svg = document.getElementById('graphSvg');
-            svg.style.transform = svg.style.transform ? 
-                `scale(${parseFloat(svg.style.transform.match(/scale\(([^)]+)\)/)?.[1] || 1) * 1.2})` : 
-                'scale(1.2)';
-        }
-
-        // 缩小
-        function zoomOut() {
-            const svg = document.getElementById('graphSvg');
-            const current = parseFloat(svg.style.transform.match(/scale\(([^)]+)\)/)?.[1] || 1);
-            svg.style.transform = `scale(${Math.max(0.5, current / 1.2)})`;
-        }
-
-        // 渲染图例
-        function renderLegend() {
-            const container = document.getElementById('legendItems');
-            const cats = ['ai', 'dev', 'data', 'content', 'search', 'productivity'];
-            
-            container.innerHTML = cats.map(id => {
-                const config = CATEGORY_CONFIG[id];
-                return `
-                    <div class="legend-item">
-                        <div class="legend-dot" style="background: ${config.color}"></div>
-                        <span>${config.name}</span>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // 事件监听
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            searchSkills(e.target.value);
-        });
-
-        // 键盘关闭详情
+        // 键盘事件
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeDetail();
+            if (e.key === 'Escape') closePanel();
         });
 
         // 启动
