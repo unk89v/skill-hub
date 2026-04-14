@@ -13,6 +13,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 const DATA_DIR = path.join(__dirname, 'data');
 const FAVORITES_FILE = path.join(DATA_DIR, 'favorites.json');
 const NOTES_FILE = path.join(DATA_DIR, 'notes.json');
+const RATINGS_FILE = path.join(DATA_DIR, 'ratings.json');
+const CASES_FILE = path.join(DATA_DIR, 'cases.json');
 
 // 确保数据目录存在
 if (!fs.existsSync(DATA_DIR)) {
@@ -40,7 +42,6 @@ function loadFavorites() {
     return {};
 }
 
-// 保存收藏
 function saveFavorites(data) {
     fs.writeFileSync(FAVORITES_FILE, JSON.stringify(data, null, 2));
 }
@@ -55,10 +56,39 @@ function loadNotes() {
     return {};
 }
 
-// 保存笔记
 function saveNotes(data) {
     fs.writeFileSync(NOTES_FILE, JSON.stringify(data, null, 2));
 }
+
+// 加载评分
+function loadRatings() {
+    try {
+        if (fs.existsSync(RATINGS_FILE)) {
+            return JSON.parse(fs.readFileSync(RATINGS_FILE, 'utf-8'));
+        }
+    } catch (e) {}
+    return {};
+}
+
+function saveRatings(data) {
+    fs.writeFileSync(RATINGS_FILE, JSON.stringify(data, null, 2));
+}
+
+// 加载案例
+function loadCases() {
+    try {
+        if (fs.existsSync(CASES_FILE)) {
+            return JSON.parse(fs.readFileSync(CASES_FILE, 'utf-8'));
+        }
+    } catch (e) {}
+    return {};
+}
+
+function saveCases(data) {
+    fs.writeFileSync(CASES_FILE, JSON.stringify(data, null, 2));
+}
+
+// ==================== 技能 API ====================
 
 // API: 获取所有技能
 app.get('/api/skills', (req, res) => {
@@ -70,7 +100,7 @@ app.get('/api/skills', (req, res) => {
     }
 });
 
-// API: 获取单个技能
+// API: 获取单个技能（含评分、案例统计）
 app.get('/api/skills/:id', (req, res) => {
     try {
         const data = loadSkills();
@@ -78,10 +108,31 @@ app.get('/api/skills/:id', (req, res) => {
         if (!skill) {
             return res.status(404).json({ error: 'Skill not found' });
         }
+        
+        // 添加评分统计
+        const ratings = loadRatings();
+        const skillRatings = ratings[req.params.id] || [];
+        const avgRating = skillRatings.length > 0 
+            ? (skillRatings.reduce((sum, r) => sum + r.rating, 0) / skillRatings.length).toFixed(1)
+            : 0;
+        
+        // 添加案例统计
+        const cases = loadCases();
+        const skillCases = cases[req.params.id] || [];
+        
         const relatedSkills = skill.related
             .map(id => data.skills.find(s => s.id === id))
             .filter(Boolean);
-        res.json({ ...skill, relatedSkills });
+        
+        res.json({ 
+            ...skill, 
+            relatedSkills,
+            stats: {
+                avgRating,
+                ratingCount: skillRatings.length,
+                caseCount: skillCases.length
+            }
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -130,6 +181,8 @@ app.get('/api/search', (req, res) => {
     }
 });
 
+// ==================== 智能推荐 API ====================
+
 // API: 智能推荐 - 根据目标推荐技能路径
 app.post('/api/recommend', (req, res) => {
     try {
@@ -143,18 +196,18 @@ app.post('/api/recommend', (req, res) => {
         
         // 关键词匹配规则
         const keywordRules = [
-            { keywords: ['ai', '智能', 'gpt', 'chatgpt', '对话'], categories: ['ai'], tags: ['AI', 'ChatGPT', '模型'] },
-            { keywords: ['客服', '机器人', '聊天'], categories: ['ai', 'automation'], tags: ['聊天', '机器人', '自动化'] },
-            { keywords: ['文档', '飞书', '协作'], categories: ['productivity'], tags: ['文档', '飞书', '协作'] },
-            { keywords: ['企业微信', '会议', '日程'], categories: ['productivity'], tags: ['企业微信', '会议', '日程'] },
-            { keywords: ['数据', '分析', '可视化'], categories: ['data'], tags: ['数据', '分析', '可视化'] },
-            { keywords: ['营销', '推广', '微博'], categories: ['marketing'], tags: ['营销', '微博', '社交'] },
-            { keywords: ['翻译', '多语言'], categories: ['translation'], tags: ['翻译'] },
-            { keywords: ['自动化', '工作流', '效率'], categories: ['automation'], tags: ['自动化', '效率'] },
-            { keywords: ['搜索', '查找', '发现'], categories: ['search'], tags: ['搜索'] },
-            { keywords: ['开发', '代码', '编程'], categories: ['dev'], tags: ['开发', '代码'] },
-            { keywords: ['设计', '图片', '图像'], categories: ['design'], tags: ['设计', '图像'] },
-            { keywords: ['内容', '写作', '创作'], categories: ['content'], tags: ['内容', '写作'] }
+            { keywords: ['ai', '智能', 'gpt', 'chatgpt', '对话', '人工智能'], categories: ['ai'], tags: ['AI', 'ChatGPT', '模型'], path: 'AI智能开发' },
+            { keywords: ['客服', '机器人', '聊天', '自动回复'], categories: ['ai', 'automation'], tags: ['聊天', '机器人', '自动化'], path: '智能客服系统' },
+            { keywords: ['文档', '飞书', '协作', '办公'], categories: ['productivity'], tags: ['文档', '飞书', '协作'], path: '智能办公协作' },
+            { keywords: ['企业微信', '会议', '日程', '通知'], categories: ['productivity'], tags: ['企业微信', '会议', '日程'], path: '企业数字化' },
+            { keywords: ['数据', '分析', '可视化', '报表', '统计'], categories: ['data'], tags: ['数据', '分析', '可视化'], path: '数据分析应用' },
+            { keywords: ['营销', '推广', '微博', '增长', '获客'], categories: ['marketing'], tags: ['营销', '微博', '社交'], path: '营销增长' },
+            { keywords: ['翻译', '多语言', '国际化'], categories: ['translation'], tags: ['翻译'], path: '多语言翻译' },
+            { keywords: ['自动化', '工作流', '效率', '批量'], categories: ['automation'], tags: ['自动化', '效率'], path: '自动化工作流' },
+            { keywords: ['搜索', '查找', '发现', '检索'], categories: ['search'], tags: ['搜索'], path: '智能搜索' },
+            { keywords: ['开发', '代码', '编程', '网站', '应用'], categories: ['dev'], tags: ['开发', '代码'], path: '软件开发' },
+            { keywords: ['设计', '图片', '图像', 'ui', '视觉'], categories: ['design'], tags: ['设计', '图像'], path: '设计创意' },
+            { keywords: ['内容', '写作', '创作', '文案', '文章'], categories: ['content'], tags: ['内容', '写作'], path: '内容创作' }
         ];
         
         // 匹配规则
@@ -167,6 +220,9 @@ app.post('/api/recommend', (req, res) => {
         });
         
         matchedRules.sort((a, b) => b.matchCount - a.matchCount);
+        
+        // 路径主题
+        const pathTheme = matchedRules[0]?.path || '技能学习路径';
         
         // 推荐技能
         let recommendations = [];
@@ -185,38 +241,149 @@ app.post('/api/recommend', (req, res) => {
             if (seen.has(s.id)) return false;
             seen.add(s.id);
             return true;
-        }).sort((a, b) => b.usage - a.usage).slice(0, 8);
+        }).sort((a, b) => b.usage - a.usage).slice(0, 6);
+        
+        // 获取评分数据
+        const ratings = loadRatings();
+        const cases = loadCases();
         
         // 构建学习路径
         const path = recommendations.map((skill, index) => {
-            const reasons = [
-                '核心技能，从这里开始',
-                '扩展能力，增强功能',
-                '集成工具，打通流程',
-                '优化体验，提升效率',
-                '进阶功能，深度定制'
+            const skillRatings = ratings[skill.id] || [];
+            const avgRating = skillRatings.length > 0 
+                ? (skillRatings.reduce((sum, r) => sum + r.rating, 0) / skillRatings.length).toFixed(1)
+                : 0;
+            const caseCount = (cases[skill.id] || []).length;
+            
+            const steps = [
+                { reason: '核心基础，从这里开始', time: '2-3小时', difficulty: '入门' },
+                { reason: '扩展能力，增强核心功能', time: '1-2小时', difficulty: '进阶' },
+                { reason: '工具集成，打通数据流程', time: '2-3小时', difficulty: '中级' },
+                { reason: '优化体验，提升使用效果', time: '1-2小时', difficulty: '进阶' },
+                { reason: '深度定制，满足特殊需求', time: '3-4小时', difficulty: '高级' },
+                { reason: '实战应用，巩固所学知识', time: '2-3小时', difficulty: '实践' }
             ];
+            
             return {
                 step: index + 1,
-                skill,
-                reason: reasons[index] || '推荐技能',
-                estimatedTime: `${Math.floor(Math.random() * 3) + 1}小时`
+                skill: {
+                    id: skill.id,
+                    title: skill.title,
+                    name: skill.name,
+                    desc: skill.desc,
+                    category: skill.category,
+                    tags: skill.tags
+                },
+                reason: steps[index].reason,
+                estimatedTime: steps[index].time,
+                difficulty: steps[index].difficulty,
+                avgRating,
+                ratingCount: skillRatings.length,
+                caseCount
             };
         });
         
         // 生成建议
         const suggestions = [
-            `建议从「${path[0]?.skill.title}」开始，这是实现你目标的核心技能`,
-            path.length > 2 ? `然后学习「${path[1].skill.title}」和「${path[2].skill.title}」来扩展功能` : '',
-            '记得查看每个技能的关联技能，可以发现更多可能'
+            `📌 建议从「${path[0]?.skill.title}」开始，这是实现你目标的核心技能`,
+            path.length > 2 ? `📌 接着学习「${path[1].skill.title}」和「${path[2].skill.title}」来扩展功能` : '',
+            '📌 每个技能完成后查看关联技能，可以发现更多可能性',
+            '📌 收藏感兴趣的技能，方便后续快速访问',
+            '💡 查看其他用户的使用案例，获得实战灵感'
         ].filter(Boolean);
         
         res.json({
             goal,
+            pathTheme,
             path,
             suggestions,
             totalSteps: path.length,
-            estimatedTotalTime: path.reduce((sum, p) => sum + parseInt(p.estimatedTime), 0) + '小时'
+            estimatedTotalTime: `${path.reduce((sum, p) => {
+                const t = parseInt(p.estimatedTime);
+                return sum + (isNaN(t) ? 0 : t);
+            }, 0)}小时`,
+            createdAt: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// API: 导出学习路径
+app.post('/api/export-path', (req, res) => {
+    try {
+        const { pathData, format } = req.body;
+        
+        if (!pathData || !pathData.path) {
+            return res.status(400).json({ error: 'Path data is required' });
+        }
+        
+        const { goal, pathTheme, path, suggestions } = pathData;
+        
+        let content = '';
+        let filename = `学习路径_${new Date().toISOString().slice(0,10)}`;
+        let mimeType = 'text/plain';
+        
+        if (format === 'markdown' || format === 'md') {
+            content = `# ${pathTheme || '技能学习路径'}
+
+> 目标：${goal}
+> 生成时间：${new Date().toLocaleString('zh-CN')}
+
+## 📚 学习路径
+
+${path.map((step, i) => `
+### ${i + 1}. ${step.skill.title}
+
+- **难度**: ${step.difficulty}
+- **预计时间**: ${step.estimatedTime}
+- **评分**: ${step.avgRating} ⭐ (${step.ratingCount} 人评价)
+- **案例**: ${step.caseCount} 个
+
+${step.reason}
+
+**标签**: ${step.skill.tags.join('、')}
+`).join('\n')}
+
+## 💡 学习建议
+
+${suggestions.map(s => `- ${s}`).join('\n')}
+
+---
+
+*由 Skillverse 智能生成*
+`;
+            filename += '.md';
+            mimeType = 'text/markdown';
+        } else if (format === 'json') {
+            content = JSON.stringify(pathData, null, 2);
+            filename += '.json';
+            mimeType = 'application/json';
+        } else {
+            // 纯文本
+            content = `${pathTheme || '技能学习路径'}
+目标：${goal}
+生成时间：${new Date().toLocaleString('zh-CN')}
+
+【学习路径】
+
+${path.map((step, i) => `${i + 1}. ${step.skill.title}
+   难度：${step.difficulty}
+   时间：${step.estimatedTime}
+   说明：${step.reason}
+`).join('\n')}
+
+【学习建议】
+${suggestions.map(s => '• ' + s).join('\n')}
+`;
+            filename += '.txt';
+        }
+        
+        res.json({
+            success: true,
+            content,
+            filename,
+            mimeType
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -234,7 +401,6 @@ app.post('/api/qa', (req, res) => {
         const data = loadSkills();
         const q = question.toLowerCase();
         
-        // 预设问答
         const qaRules = [
             {
                 patterns: ['怎么开始', '如何使用', '新手', '入门'],
@@ -263,7 +429,6 @@ app.post('/api/qa', (req, res) => {
             }
         ];
         
-        // 匹配规则
         let matched = null;
         for (const rule of qaRules) {
             if (rule.patterns.some(p => q.includes(p))) {
@@ -280,7 +445,6 @@ app.post('/api/qa', (req, res) => {
                 followUp: '还有其他问题吗？'
             });
         } else {
-            // 默认回复
             const topSkills = data.skills.sort((a, b) => b.usage - a.usage).slice(0, 3);
             res.json({
                 question,
@@ -294,7 +458,8 @@ app.post('/api/qa', (req, res) => {
     }
 });
 
-// API: 图谱数据
+// ==================== 图谱 API ====================
+
 app.get('/api/graph', (req, res) => {
     try {
         const data = loadSkills();
@@ -335,7 +500,8 @@ app.get('/api/graph', (req, res) => {
     }
 });
 
-// API: 收藏管理
+// ==================== 收藏 API ====================
+
 app.get('/api/favorites', (req, res) => {
     res.json(loadFavorites());
 });
@@ -376,7 +542,8 @@ app.delete('/api/favorites', (req, res) => {
     }
 });
 
-// API: 笔记管理
+// ==================== 笔记 API ====================
+
 app.get('/api/notes/:skillId', (req, res) => {
     try {
         const notes = loadNotes();
@@ -427,16 +594,206 @@ app.delete('/api/notes/:skillId/:noteId', (req, res) => {
     }
 });
 
+// ==================== 评分 API ====================
+
+// 获取技能评分列表
+app.get('/api/ratings/:skillId', (req, res) => {
+    try {
+        const ratings = loadRatings();
+        const skillRatings = ratings[req.params.skillId] || [];
+        
+        const avgRating = skillRatings.length > 0 
+            ? (skillRatings.reduce((sum, r) => sum + r.rating, 0) / skillRatings.length).toFixed(1)
+            : 0;
+        
+        res.json({
+            ratings: skillRatings,
+            avgRating,
+            count: skillRatings.length
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 提交评分
+app.post('/api/ratings', (req, res) => {
+    try {
+        const { skillId, rating, review, userId } = req.body;
+        
+        if (!skillId || !rating || rating < 1 || rating > 5) {
+            return res.status(400).json({ error: 'Invalid rating data' });
+        }
+        
+        const ratings = loadRatings();
+        
+        if (!ratings[skillId]) {
+            ratings[skillId] = [];
+        }
+        
+        // 检查是否已评分（每个用户每个技能只能评一次）
+        const existingIndex = ratings[skillId].findIndex(r => r.userId === userId);
+        
+        const ratingData = {
+            id: Date.now(),
+            userId: userId || 'default',
+            rating: parseInt(rating),
+            review: review || '',
+            createdAt: new Date().toISOString()
+        };
+        
+        if (existingIndex > -1) {
+            ratings[skillId][existingIndex] = ratingData;
+        } else {
+            ratings[skillId].push(ratingData);
+        }
+        
+        saveRatings(ratings);
+        
+        const avgRating = (ratings[skillId].reduce((sum, r) => sum + r.rating, 0) / ratings[skillId].length).toFixed(1);
+        
+        res.json({ 
+            success: true, 
+            rating: ratingData,
+            avgRating,
+            count: ratings[skillId].length
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ==================== 使用案例 API ====================
+
+// 获取技能案例列表
+app.get('/api/cases/:skillId', (req, res) => {
+    try {
+        const cases = loadCases();
+        const skillCases = cases[req.params.skillId] || [];
+        
+        // 按点赞数排序
+        skillCases.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+        
+        res.json(skillCases);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 提交使用案例
+app.post('/api/cases', (req, res) => {
+    try {
+        const { skillId, title, content, tags, userId, userName } = req.body;
+        
+        if (!skillId || !title || !content) {
+            return res.status(400).json({ error: 'Title and content are required' });
+        }
+        
+        const cases = loadCases();
+        
+        if (!cases[skillId]) {
+            cases[skillId] = [];
+        }
+        
+        const caseData = {
+            id: Date.now(),
+            skillId,
+            userId: userId || 'default',
+            userName: userName || '匿名用户',
+            title,
+            content,
+            tags: tags || [],
+            likes: 0,
+            likedBy: [],
+            createdAt: new Date().toISOString()
+        };
+        
+        cases[skillId].push(caseData);
+        saveCases(cases);
+        
+        res.json({ success: true, case: caseData });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 点赞案例
+app.post('/api/cases/:skillId/:caseId/like', (req, res) => {
+    try {
+        const { skillId, caseId } = req.params;
+        const { userId } = req.body;
+        
+        const cases = loadCases();
+        
+        if (cases[skillId]) {
+            const caseItem = cases[skillId].find(c => c.id === parseInt(caseId));
+            if (caseItem) {
+                if (!caseItem.likedBy) {
+                    caseItem.likedBy = [];
+                }
+                
+                const hasLiked = caseItem.likedBy.includes(userId);
+                
+                if (hasLiked) {
+                    // 取消点赞
+                    caseItem.likedBy = caseItem.likedBy.filter(id => id !== userId);
+                    caseItem.likes = Math.max(0, (caseItem.likes || 0) - 1);
+                } else {
+                    // 点赞
+                    caseItem.likedBy.push(userId);
+                    caseItem.likes = (caseItem.likes || 0) + 1;
+                }
+                
+                saveCases(cases);
+                res.json({ success: true, likes: caseItem.likes, hasLiked: !hasLiked });
+            } else {
+                res.status(404).json({ error: 'Case not found' });
+            }
+        } else {
+            res.status(404).json({ error: 'Skill not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 删除案例
+app.delete('/api/cases/:skillId/:caseId', (req, res) => {
+    try {
+        const { skillId, caseId } = req.params;
+        const { userId } = req.body;
+        
+        const cases = loadCases();
+        
+        if (cases[skillId]) {
+            const caseIndex = cases[skillId].findIndex(c => c.id === parseInt(caseId) && c.userId === userId);
+            
+            if (caseIndex > -1) {
+                cases[skillId].splice(caseIndex, 1);
+                saveCases(cases);
+                res.json({ success: true });
+            } else {
+                res.status(403).json({ error: 'Not authorized to delete this case' });
+            }
+        } else {
+            res.status(404).json({ error: 'Skill not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // 启动服务
 app.listen(PORT, () => {
     console.log(`
 ╔════════════════════════════════════════════╗
 ║                                            ║
-║   🌌 Skillverse is running!                ║
+║   🌌 Skillverse v3.0 is running!           ║
 ║                                            ║
 ║   Local:  http://localhost:${PORT}            ║
 ║                                            ║
 ║   ✨ 探索技能宇宙，发现无限可能              ║
+║   ⭐ 技能评分 | 📝 使用案例 | 📤 导出路径   ║
 ║                                            ║
 ╚════════════════════════════════════════════╝
     `);

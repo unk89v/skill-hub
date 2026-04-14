@@ -51,7 +51,6 @@
             50% { opacity: 1; transform: scale(1.2); }
         }
 
-        /* 极光效果 */
         .aurora {
             position: fixed;
             top: 0;
@@ -193,7 +192,6 @@
             padding: 24px;
         }
 
-        /* 视图切换 */
         .view { display: none; }
         .view.active { display: block; }
 
@@ -222,7 +220,6 @@
             margin: 0 auto 24px;
         }
 
-        /* 搜索 */
         .search-container {
             max-width: 700px;
             margin: 0 auto 32px;
@@ -258,7 +255,6 @@
             color: rgba(255,255,255,0.3);
         }
 
-        /* 快捷标签 */
         .quick-tags {
             display: flex;
             justify-content: center;
@@ -526,6 +522,19 @@
             gap: 6px;
         }
 
+        /* 技能评分显示 */
+        .skill-rating {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .skill-rating .stars {
+            color: var(--star-gold);
+        }
+
         /* 图谱视图 */
         .graph-container {
             height: calc(100vh - 200px);
@@ -717,6 +726,9 @@
 
         .result-header {
             margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
         }
 
         .result-header h3 {
@@ -727,6 +739,30 @@
         .result-header p {
             font-size: 14px;
             color: rgba(255,255,255,0.5);
+        }
+
+        .export-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .export-btn {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            font-size: 12px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .export-btn:hover {
+            background: rgba(168, 85, 247, 0.2);
+            border-color: var(--aurora-purple);
         }
 
         .result-path {
@@ -764,6 +800,10 @@
             flex-shrink: 0;
         }
 
+        .step-info {
+            flex: 1;
+        }
+
         .step-info h4 {
             font-size: 16px;
             margin-bottom: 4px;
@@ -772,6 +812,24 @@
         .step-info p {
             font-size: 13px;
             color: rgba(255,255,255,0.5);
+        }
+
+        .step-meta {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .step-meta span {
+            padding: 4px 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .step-meta .rating {
+            color: var(--star-gold);
         }
 
         .step-time {
@@ -824,8 +882,8 @@
         .detail-panel {
             position: fixed;
             top: 0;
-            right: -500px;
-            width: 500px;
+            right: -550px;
+            width: 550px;
             height: 100vh;
             background: linear-gradient(180deg, var(--nebula-blue), var(--cosmic-purple));
             border-left: 1px solid rgba(255,255,255,0.08);
@@ -971,6 +1029,12 @@
             background: rgba(255,255,255,0.03);
             border-radius: 14px;
             border: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .panel-stat:hover {
+            border-color: var(--aurora-purple);
         }
 
         .panel-stat-value {
@@ -985,6 +1049,206 @@
             font-size: 10px;
             color: rgba(255,255,255,0.4);
             margin-top: 4px;
+        }
+
+        /* 评分区域 */
+        .rating-section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 14px;
+            padding: 20px;
+        }
+
+        .rating-display {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .rating-score {
+            font-size: 48px;
+            font-weight: 900;
+            color: var(--star-gold);
+        }
+
+        .rating-stars {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .rating-stars .stars {
+            font-size: 20px;
+            color: var(--star-gold);
+        }
+
+        .rating-count {
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .rating-input {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .rating-input label {
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .star-rating {
+            display: flex;
+            gap: 4px;
+        }
+
+        .star-rating .star {
+            font-size: 24px;
+            color: rgba(255,255,255,0.2);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .star-rating .star:hover,
+        .star-rating .star.active {
+            color: var(--star-gold);
+            transform: scale(1.1);
+        }
+
+        .review-input {
+            width: 100%;
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            font-size: 13px;
+            color: white;
+            min-height: 60px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .review-input:focus {
+            outline: none;
+            border-color: var(--aurora-purple);
+        }
+
+        .submit-rating-btn {
+            margin-top: 12px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--aurora-purple), var(--aurora-pink));
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* 案例区域 */
+        .cases-section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 14px;
+            padding: 16px;
+        }
+
+        .case-form {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .case-form input,
+        .case-form textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            font-size: 13px;
+            color: white;
+            margin-bottom: 10px;
+            font-family: inherit;
+        }
+
+        .case-form textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .case-form input:focus,
+        .case-form textarea:focus {
+            outline: none;
+            border-color: var(--aurora-purple);
+        }
+
+        .case-submit-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--aurora-blue), var(--aurora-purple));
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+        }
+
+        .case-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .case-item {
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .case-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .case-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .case-like {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            cursor: pointer;
+        }
+
+        .case-like.liked {
+            color: var(--aurora-pink);
+        }
+
+        .case-content {
+            font-size: 13px;
+            line-height: 1.6;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 8px;
+        }
+
+        .case-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
         }
 
         /* 笔记 */
@@ -1203,6 +1467,36 @@
             opacity: 0.3;
         }
 
+        /* Tab 切换 */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            background: rgba(255,255,255,0.03);
+            padding: 4px;
+            border-radius: 10px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: white;
+        }
+
+        .tab.active {
+            background: rgba(168, 85, 247, 0.2);
+            color: white;
+        }
+
         /* 响应式 */
         @media (max-width: 768px) {
             .main-container { padding: 16px; }
@@ -1212,12 +1506,10 @@
             .nav-tabs { display: none; }
         }
 
-        /* 滚动条 */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
 
-        /* 加载动画 */
         .loading {
             display: flex;
             align-items: center;
@@ -1238,11 +1530,9 @@
     </style>
 </head>
 <body>
-    <!-- 星空背景 -->
     <div class="starfield" id="starfield"></div>
     <div class="aurora"></div>
 
-    <!-- 导航 -->
     <nav class="navbar">
         <div class="nav-content">
             <div class="logo">
@@ -1272,7 +1562,6 @@
         </div>
     </nav>
 
-    <!-- 主内容 -->
     <div class="main-container">
         <!-- 探索视图 -->
         <div class="view active" id="exploreView">
@@ -1281,8 +1570,7 @@
                 <p>每个技能都是一颗星球，点击探索发现意想不到的关联</p>
                 <div class="search-container">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="search-box" id="searchInput" 
-                           placeholder="搜索技能、场景、目标...">
+                    <input type="text" class="search-box" id="searchInput" placeholder="搜索技能、场景、目标...">
                 </div>
                 <div class="quick-tags">
                     <div class="quick-tag" onclick="quickSearch('ChatGPT')">🤖 ChatGPT</div>
@@ -1374,12 +1662,13 @@
         let selectedSkill = null;
         let favorites = [];
         let notes = {};
+        let userRatings = {};
         let graphData = null;
         let simulation = null;
+        let currentPathData = null;
 
-        const userId = 'default';
+        const userId = 'user_' + Date.now();
 
-        // 分类配置
         const CATEGORY_CONFIG = {
             ai: { name: 'AI 智能', icon: '🧠', color: '#a855f7' },
             dev: { name: '开发工具', icon: '💻', color: '#3b82f6' },
@@ -1418,7 +1707,6 @@
             'clawhub': 'https://clawhub.com'
         };
 
-        // 创建星空
         function createStars() {
             const starfield = document.getElementById('starfield');
             for (let i = 0; i < 80; i++) {
@@ -1433,7 +1721,6 @@
             }
         }
 
-        // 初始化
         async function init() {
             createStars();
             
@@ -1453,7 +1740,6 @@
             }
         }
 
-        // 切换视图
         function switchView(view) {
             document.querySelectorAll('.nav-tab').forEach(tab => {
                 tab.classList.toggle('active', tab.dataset.view === view);
@@ -1467,13 +1753,11 @@
             }
         }
 
-        // 快速搜索
         function quickSearch(query) {
             document.getElementById('searchInput').value = query;
             searchSkills(query);
         }
 
-        // 搜索
         document.getElementById('searchInput').addEventListener('input', (e) => {
             searchSkills(e.target.value);
         });
@@ -1511,7 +1795,6 @@
             return score;
         }
 
-        // 渲染分类
         function renderCategories() {
             const container = document.getElementById('categories');
             
@@ -1546,7 +1829,6 @@
             renderSkills(filtered);
         }
 
-        // 渲染路径
         function renderPath() {
             const topSkills = allSkills.sort((a, b) => b.usage - a.usage).slice(0, 5);
             const container = document.getElementById('pathSteps');
@@ -1570,8 +1852,7 @@
             `).join('');
         }
 
-        // 渲染技能
-        function renderSkills(skills) {
+        async function renderSkills(skills) {
             const container = document.getElementById('skillsGrid');
 
             if (skills.length === 0) {
@@ -1584,10 +1865,20 @@
                 return;
             }
 
-            container.innerHTML = skills.slice(0, 12).map(skill => {
+            // 批量获取评分
+            const ratingsPromises = skills.slice(0, 12).map(skill => 
+                fetch(`/api/ratings/${skill.id}`).then(r => r.json()).catch(() => ({ avgRating: 0, count: 0 }))
+            );
+            
+            const ratingsData = await Promise.all(ratingsPromises);
+
+            container.innerHTML = skills.slice(0, 12).map((skill, idx) => {
                 const config = CATEGORY_CONFIG[skill.category] || { icon: '⭐' };
                 const isHot = skill.usage > 50000;
                 const isFav = favorites.includes(skill.id);
+                const rating = ratingsData[idx];
+                const avgRating = rating.avgRating || 0;
+                const ratingCount = rating.count || 0;
 
                 return `
                     <div class="skill-card" onclick="openSkill(${skill.id})"
@@ -1610,7 +1901,10 @@
                             }).join('')}
                         </div>
                         <div class="skill-footer">
-                            <div class="skill-related"><i class="fas fa-link"></i> ${skill.related.length} 个关联</div>
+                            <div class="skill-rating">
+                                <span class="stars">${'★'.repeat(Math.round(avgRating))}${'☆'.repeat(5 - Math.round(avgRating))}</span>
+                                <span>${avgRating} (${ratingCount})</span>
+                            </div>
                             <div class="skill-cta">探索 <i class="fas fa-arrow-right"></i></div>
                         </div>
                     </div>
@@ -1618,7 +1912,6 @@
             }).join('');
         }
 
-        // 打开技能
         async function openSkill(id) {
             selectedSkill = allSkills.find(s => s.id === id);
             const config = CATEGORY_CONFIG[selectedSkill.category] || { icon: '⭐' };
@@ -1636,15 +1929,36 @@
                 ${url ? `<a href="${url}" target="_blank" class="panel-btn primary"><i class="fas fa-external-link-alt"></i> 官网</a>` : ''}
             `;
 
-            // 加载笔记
-            await loadNotes(id);
+            await loadSkillDetail(id);
+            document.getElementById('detailPanel').classList.add('open');
+        }
 
+        async function loadSkillDetail(id) {
+            const panelBody = document.getElementById('panelBody');
+            
+            // 加载评分
+            const ratingsRes = await fetch(`/api/ratings/${id}`);
+            const ratingsData = await ratingsRes.json();
+            
+            // 加载案例
+            const casesRes = await fetch(`/api/cases/${id}`);
+            const casesData = await casesRes.json();
+            
+            // 加载笔记
+            const notesRes = await fetch(`/api/notes/${id}`);
+            const notesData = await notesRes.json();
+            notes[id] = notesData;
+
+            const config = CATEGORY_CONFIG[selectedSkill.category] || { icon: '⭐', name: '其他' };
             const related = selectedSkill.related
                 .map(id => allSkills.find(s => s.id === id))
                 .filter(Boolean)
                 .slice(0, 6);
 
-            document.getElementById('panelBody').innerHTML = `
+            const userRating = userRatings[id] || 0;
+            const userReview = ratingsData.ratings?.find(r => r.userId === userId)?.review || '';
+
+            panelBody.innerHTML = `
                 <div class="panel-section">
                     <div class="panel-section-title">简介</div>
                     <p class="panel-desc">${selectedSkill.desc}</p>
@@ -1653,17 +1967,55 @@
                 <div class="panel-section">
                     <div class="panel-section-title">数据</div>
                     <div class="panel-stats">
-                        <div class="panel-stat">
-                            <div class="panel-stat-value">${(selectedSkill.usage / 1000).toFixed(1)}k</div>
-                            <div class="panel-stat-label">使用次数</div>
+                        <div class="panel-stat" onclick="scrollToRating()">
+                            <div class="panel-stat-value">${ratingsData.avgRating || 0}</div>
+                            <div class="panel-stat-label">评分 (${ratingsData.count || 0}人)</div>
                         </div>
-                        <div class="panel-stat">
-                            <div class="panel-stat-value">${selectedSkill.tags.length}</div>
-                            <div class="panel-stat-label">标签</div>
+                        <div class="panel-stat" onclick="scrollToCases()">
+                            <div class="panel-stat-value">${casesData.length || 0}</div>
+                            <div class="panel-stat-label">使用案例</div>
                         </div>
                         <div class="panel-stat">
                             <div class="panel-stat-value">${selectedSkill.related.length}</div>
-                            <div class="panel-stat-label">关联</div>
+                            <div class="panel-stat-label">关联技能</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel-section" id="ratingSection">
+                    <div class="panel-section-title">评分评价</div>
+                    <div class="rating-section">
+                        <div class="rating-display">
+                            <div class="rating-score">${ratingsData.avgRating || '0.0'}</div>
+                            <div class="rating-stars">
+                                <div class="stars">${'★'.repeat(Math.round(ratingsData.avgRating || 0))}${'☆'.repeat(5 - Math.round(ratingsData.avgRating || 0))}</div>
+                                <div class="rating-count">${ratingsData.count || 0} 人评价</div>
+                            </div>
+                        </div>
+                        <div class="rating-input">
+                            <label>我的评分：</label>
+                            <div class="star-rating" id="starRating">
+                                ${[1,2,3,4,5].map(i => `
+                                    <span class="star ${userRating >= i ? 'active' : ''}" 
+                                          onclick="setRating(${id}, ${i})">★</span>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <textarea class="review-input" id="reviewInput" placeholder="分享你的使用体验（可选）...">${userReview}</textarea>
+                        <button class="submit-rating-btn" onclick="submitRating(${id})">提交评价</button>
+                    </div>
+                </div>
+                
+                <div class="panel-section" id="casesSection">
+                    <div class="panel-section-title">使用案例</div>
+                    <div class="cases-section">
+                        <div class="case-form">
+                            <input type="text" id="caseTitle" placeholder="案例标题">
+                            <textarea id="caseContent" placeholder="描述你如何使用这个技能..."></textarea>
+                            <button class="case-submit-btn" onclick="submitCase(${id})">分享案例</button>
+                        </div>
+                        <div class="case-list" id="caseList">
+                            ${renderCases(casesData)}
                         </div>
                     </div>
                 </div>
@@ -1673,7 +2025,9 @@
                     <div class="notes-section">
                         <textarea class="note-input" id="noteInput" placeholder="记录你的想法、使用心得..."></textarea>
                         <button class="note-save-btn" onclick="saveNote(${id})">保存笔记</button>
-                        <div class="note-list" id="noteList"></div>
+                        <div class="note-list" id="noteList">
+                            ${renderNotes(notes[id] || [])}
+                        </div>
                     </div>
                 </div>
                 
@@ -1697,8 +2051,132 @@
                 </div>
                 ` : ''}
             `;
+        }
 
-            document.getElementById('detailPanel').classList.add('open');
+        function renderCases(cases) {
+            if (!cases || cases.length === 0) {
+                return '<div class="empty-state" style="padding: 20px; font-size: 12px;">暂无案例，快来分享你的使用经验吧</div>';
+            }
+            
+            return cases.slice(0, 5).map(c => {
+                const hasLiked = c.likedBy?.includes(userId);
+                return `
+                    <div class="case-item">
+                        <div class="case-header">
+                            <div class="case-title">${c.title}</div>
+                            <div class="case-like ${hasLiked ? 'liked' : ''}" onclick="likeCase(${c.skillId}, ${c.id})">
+                                <i class="fas fa-heart"></i> ${c.likes || 0}
+                            </div>
+                        </div>
+                        <div class="case-content">${c.content}</div>
+                        <div class="case-meta">
+                            <span>${c.userName}</span>
+                            <span>${new Date(c.createdAt).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderNotes(notesList) {
+            if (!notesList || notesList.length === 0) return '';
+            
+            return notesList.map(note => `
+                <div class="note-item">
+                    <div class="note-content">${note.content}</div>
+                    <div class="note-time">${new Date(note.createdAt).toLocaleString()}</div>
+                    <div class="note-delete" onclick="deleteNote(${selectedSkill.id}, ${note.id})">
+                        <i class="fas fa-trash"></i>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function scrollToRating() {
+            document.getElementById('ratingSection')?.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function scrollToCases() {
+            document.getElementById('casesSection')?.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function setRating(skillId, rating) {
+            userRatings[skillId] = rating;
+            document.querySelectorAll('#starRating .star').forEach((star, idx) => {
+                star.classList.toggle('active', idx < rating);
+            });
+        }
+
+        async function submitRating(skillId) {
+            const rating = userRatings[skillId] || 0;
+            const review = document.getElementById('reviewInput').value.trim();
+            
+            if (!rating) {
+                alert('请先选择评分');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/ratings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ skillId, rating, review, userId })
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    await loadSkillDetail(skillId);
+                    renderSkills(currentCategory ? allSkills.filter(s => s.category === currentCategory) : allSkills);
+                }
+            } catch (e) {
+                console.error('提交评分失败:', e);
+            }
+        }
+
+        async function submitCase(skillId) {
+            const title = document.getElementById('caseTitle').value.trim();
+            const content = document.getElementById('caseContent').value.trim();
+            
+            if (!title || !content) {
+                alert('请填写案例标题和内容');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/cases', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ skillId, title, content, userId, userName: '用户' + userId.slice(-4) })
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    document.getElementById('caseTitle').value = '';
+                    document.getElementById('caseContent').value = '';
+                    await loadSkillDetail(skillId);
+                }
+            } catch (e) {
+                console.error('提交案例失败:', e);
+            }
+        }
+
+        async function likeCase(skillId, caseId) {
+            try {
+                const res = await fetch(`/api/cases/${skillId}/${caseId}/like`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId })
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    const casesRes = await fetch(`/api/cases/${skillId}`);
+                    const casesData = await casesRes.json();
+                    document.getElementById('caseList').innerHTML = renderCases(casesData);
+                }
+            } catch (e) {
+                console.error('点赞失败:', e);
+            }
         }
 
         function closeDetail() {
@@ -1731,7 +2209,7 @@
                 favorites.push(id);
             }
             saveFavoritesToStorage();
-            openSkill(id); // 刷新面板
+            openSkill(id);
             renderSkills(currentCategory ? allSkills.filter(s => s.category === currentCategory) : allSkills);
         }
 
@@ -1782,36 +2260,6 @@
         }
 
         // 笔记功能
-        async function loadNotes(skillId) {
-            try {
-                const res = await fetch(`/api/notes/${skillId}`);
-                notes[skillId] = await res.json();
-                renderNotes(skillId);
-            } catch (e) {
-                notes[skillId] = [];
-            }
-        }
-
-        function renderNotes(skillId) {
-            const container = document.getElementById('noteList');
-            const skillNotes = notes[skillId] || [];
-            
-            if (skillNotes.length === 0) {
-                container.innerHTML = '';
-                return;
-            }
-
-            container.innerHTML = skillNotes.map(note => `
-                <div class="note-item">
-                    <div class="note-content">${note.content}</div>
-                    <div class="note-time">${new Date(note.createdAt).toLocaleString()}</div>
-                    <div class="note-delete" onclick="deleteNote(${skillId}, ${note.id})">
-                        <i class="fas fa-trash"></i>
-                    </div>
-                </div>
-            `).join('');
-        }
-
         async function saveNote(skillId) {
             const input = document.getElementById('noteInput');
             const content = input.value.trim();
@@ -1826,7 +2274,9 @@
                 const data = await res.json();
                 if (data.success) {
                     input.value = '';
-                    await loadNotes(skillId);
+                    const notesRes = await fetch(`/api/notes/${skillId}`);
+                    notes[skillId] = await notesRes.json();
+                    document.getElementById('noteList').innerHTML = renderNotes(notes[skillId]);
                 }
             } catch (e) {
                 console.error('保存笔记失败:', e);
@@ -1838,7 +2288,9 @@
                 const res = await fetch(`/api/notes/${skillId}/${noteId}`, { method: 'DELETE' });
                 const data = await res.json();
                 if (data.success) {
-                    await loadNotes(skillId);
+                    const notesRes = await fetch(`/api/notes/${skillId}`);
+                    notes[skillId] = await notesRes.json();
+                    document.getElementById('noteList').innerHTML = renderNotes(notes[skillId]);
                 }
             } catch (e) {
                 console.error('删除笔记失败:', e);
@@ -1863,8 +2315,8 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ goal })
                 });
-                const data = await res.json();
-                renderRecommendation(data);
+                currentPathData = await res.json();
+                renderRecommendation(currentPathData);
             } catch (e) {
                 resultContainer.innerHTML = `<div class="empty-state">推荐失败，请重试</div>`;
             }
@@ -1888,24 +2340,39 @@
             container.innerHTML = `
                 <div class="recommend-result">
                     <div class="result-header">
-                        <h3>🎯 为你推荐的技能路径</h3>
-                        <p>预计学习时间：${data.estimatedTotalTime}</p>
+                        <div>
+                            <h3>🎯 ${data.pathTheme || '为你推荐的技能路径'}</h3>
+                            <p>预计学习时间：${data.estimatedTotalTime} · 共 ${data.totalSteps} 个技能</p>
+                        </div>
+                        <div class="export-btns">
+                            <button class="export-btn" onclick="exportPath('markdown')">
+                                <i class="fas fa-file-alt"></i> Markdown
+                            </button>
+                            <button class="export-btn" onclick="exportPath('json')">
+                                <i class="fas fa-code"></i> JSON
+                            </button>
+                            <button class="export-btn" onclick="exportPath('txt')">
+                                <i class="fas fa-file"></i> TXT
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="result-path">
-                        ${data.path.map(step => {
-                            const config = CATEGORY_CONFIG[step.skill.category] || { icon: '⭐' };
-                            return `
-                                <div class="path-step" onclick="openSkill(${step.skill.id})">
-                                    <div class="step-number">${step.step}</div>
-                                    <div style="flex: 1">
-                                        <h4>${step.skill.title}</h4>
-                                        <p>${step.reason}</p>
+                        ${data.path.map(step => `
+                            <div class="path-step" onclick="openSkill(${step.skill.id})">
+                                <div class="step-number">${step.step}</div>
+                                <div style="flex: 1">
+                                    <h4>${step.skill.title}</h4>
+                                    <p>${step.reason}</p>
+                                    <div class="step-meta">
+                                        <span>⏱ ${step.estimatedTime}</span>
+                                        <span>📊 ${step.difficulty}</span>
+                                        <span class="rating">⭐ ${step.avgRating} (${step.ratingCount})</span>
+                                        <span>📝 ${step.caseCount} 案例</span>
                                     </div>
-                                    <div class="step-time">${step.estimatedTime}</div>
                                 </div>
-                            `;
-                        }).join('')}
+                            </div>
+                        `).join('')}
                     </div>
                     
                     <div class="result-suggestions">
@@ -1916,6 +2383,32 @@
                     </div>
                 </div>
             `;
+        }
+
+        async function exportPath(format) {
+            if (!currentPathData) return;
+            
+            try {
+                const res = await fetch('/api/export-path', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pathData: currentPathData, format })
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    // 创建下载
+                    const blob = new Blob([data.content], { type: data.mimeType });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = data.filename;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                }
+            } catch (e) {
+                console.error('导出失败:', e);
+            }
         }
 
         // 图谱功能
@@ -2045,37 +2538,21 @@
         }
 
         function filterGraph() {
-            const query = document.getElementById('graphSearchInput').value.toLowerCase();
-            const category = document.getElementById('graphFilter').value;
-            
-            // 重新加载图谱并过滤
-            loadGraph().then(() => {
-                if (query || category) {
-                    // 高亮匹配的节点
-                    d3.selectAll('#graphSvg circle')
-                        .style('opacity', d => {
-                            const nameMatch = d.name.toLowerCase().includes(query);
-                            const categoryMatch = !category || d.category === category;
-                            return (nameMatch && categoryMatch) ? 1 : 0.2;
-                        });
-                }
-            });
+            loadGraph();
         }
 
         function zoomIn() {
-            const svg = document.getElementById('graphSvg');
-            d3.select(svg).transition().call(
+            d3.select('#graphSvg').transition().duration(300).call(
                 d3.zoom().on('zoom', event => {
-                    d3.select(svg).select('g').attr('transform', event.transform);
+                    d3.select('#graphSvg').selectAll('g').attr('transform', event.transform);
                 }).scaleBy, 1.3
             );
         }
 
         function zoomOut() {
-            const svg = document.getElementById('graphSvg');
-            d3.select(svg).transition().call(
+            d3.select('#graphSvg').transition().duration(300).call(
                 d3.zoom().on('zoom', event => {
-                    d3.select(svg).select('g').attr('transform', event.transform);
+                    d3.select('#graphSvg').selectAll('g').attr('transform', event.transform);
                 }).scaleBy, 0.7
             );
         }
@@ -2086,7 +2563,6 @@
             loadGraph();
         }
 
-        // 键盘事件
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeDetail();
@@ -2094,7 +2570,6 @@
             }
         });
 
-        // 启动
         init();
     </script>
 </body>
