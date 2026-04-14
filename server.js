@@ -1,186 +1,214 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const cors = require('cors');
 
 const app = express();
-const PORT = process.env.PORT || 3100;
+const PORT = process.env.PORT || 8080;
 
-app.use(cors());
-app.use(express.json());
+// 中间件
+app.use(express.json({ limit: '100mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // 加载技能数据
 let skillsData = null;
-function loadSkillsData() {
+
+function loadSkills() {
     if (!skillsData) {
         const dataPath = path.join(__dirname, 'data', 'skills.json');
-        skillsData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+        skillsData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
     }
     return skillsData;
 }
 
-// 获取所有技能
+// API: 获取所有技能
 app.get('/api/skills', (req, res) => {
-    const data = loadSkillsData();
-    const { category, sort, limit } = req.query;
-    
-    let skills = [...data.skills];
-    
-    // 按分类过滤
-    if (category && category !== 'all') {
-        skills = skills.filter(s => s.category === category);
+    try {
+        const data = loadSkills();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-    
-    // 排序
-    if (sort === 'usage') {
-        skills.sort((a, b) => b.usage - a.usage);
-    } else if (sort === 'name') {
-        skills.sort((a, b) => a.name.localeCompare(b.name));
-    }
-    
-    // 限制数量
-    if (limit) {
-        skills = skills.slice(0, parseInt(limit));
-    }
-    
-    res.json({ skills, categories: data.categories });
 });
 
-// 获取单个技能
+// API: 获取单个技能详情
 app.get('/api/skills/:id', (req, res) => {
-    const data = loadSkillsData();
-    const skill = data.skills.find(s => s.id === parseInt(req.params.id));
-    
-    if (!skill) {
-        return res.status(404).json({ error: 'Skill not found' });
+    try {
+        const data = loadSkills();
+        const skill = data.skills.find(s => s.id === parseInt(req.params.id));
+        if (!skill) {
+            return res.status(404).json({ error: 'Skill not found' });
+        }
+        
+        // 获取关联技能详情
+        const relatedSkills = skill.related
+            .map(id => data.skills.find(s => s.id === id))
+            .filter(Boolean);
+        
+        res.json({ ...skill, relatedSkills });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-    
-    // 获取关联技能
-    const relatedSkills = skill.related.map(id => 
-        data.skills.find(s => s.id === id)
-    ).filter(Boolean);
-    
-    res.json({ skill, relatedSkills });
 });
 
-// 搜索技能
-app.post('/api/search', (req, res) => {
-    const data = loadSkillsData();
-    const { query } = req.body;
-    
-    if (!query || !query.trim()) {
-        return res.json({ results: [] });
-    }
-    
-    const keywords = query.toLowerCase().split(/\s+/);
-    
-    const results = data.skills.filter(skill => {
-        const searchText = `${skill.name} ${skill.title} ${skill.desc} ${skill.tags.join(' ')}`.toLowerCase();
-        return keywords.every(kw => searchText.includes(kw));
-    }).map(skill => ({
-        ...skill,
-        score: keywords.reduce((acc, kw) => {
-            let score = 0;
-            if (skill.name.toLowerCase().includes(kw)) score += 10;
-            if (skill.title.toLowerCase().includes(kw)) score += 8;
-            if (skill.desc.toLowerCase().includes(kw)) score += 5;
-            if (skill.tags.some(t => t.toLowerCase().includes(kw))) score += 3;
-            return acc + score;
-        }, 0)
-    })).sort((a, b) => b.score - a.score);
-    
-    res.json({ results: results.slice(0, 50) });
-});
+// API: 智能推荐 - 根据目标推荐技能路径
+app.post('/api/recommend', (req, res) => {
+    try {
+        const { goal } = req.body;
+        if (!goal) {
+            return res.status(400).json({ error: 'Goal is required' });
+        }
 
-// 获取关联图数据
-app.get('/api/graph', (req, res) => {
-    const data = loadSkillsData();
-    const { limit = 100 } = req.query;
-    
-    // 取使用量最高的技能
-    const topSkills = [...data.skills]
-        .sort((a, b) => b.usage - a.usage)
-        .slice(0, parseInt(limit));
-    
-    const nodes = topSkills.map(s => ({
-        id: s.id,
-        name: s.name,
-        title: s.title,
-        category: s.category,
-        usage: s.usage,
-        size: Math.max(10, Math.min(50, s.usage / 2000))
-    }));
-    
-    const links = [];
-    const nodeIds = new Set(nodes.map(n => n.id));
-    
-    topSkills.forEach(skill => {
-        skill.related.forEach(relId => {
-            if (nodeIds.has(relId) && relId > skill.id) {
-                links.push({
-                    source: skill.id,
-                    target: relId
-                });
+        const data = loadSkills();
+        const goalLower = goal.toLowerCase();
+        
+        // 关键词匹配
+        const keywords = {
+            'ai': ['AI', '智能', '模型', 'GPT', 'ChatGPT'],
+            '客服': ['聊天', '机器人', '对话', '客服'],
+            '文档': ['文档', '飞书', '企业微信', '写作'],
+            '数据': ['数据', '分析', '可视化', '表格'],
+            '营销': ['营销', '推广', '微博', '社交'],
+            '翻译': ['翻译', '多语言', '国际化'],
+            '自动化': ['自动化', '效率', '流程'],
+            '搜索': ['搜索', '百度', '发现']
+        };
+        
+        // 匹配关键词
+        const matchedCategories = [];
+        Object.entries(keywords).forEach(([key, words]) => {
+            if (goalLower.includes(key) || words.some(w => goalLower.includes(w.toLowerCase()))) {
+                matchedCategories.push(key);
             }
         });
-    });
-    
-    res.json({ nodes, links, categories: data.categories });
-});
-
-// 获取排行榜
-app.get('/api/ranking', (req, res) => {
-    const data = loadSkillsData();
-    const { category, limit = 50 } = req.query;
-    
-    let skills = [...data.skills];
-    
-    if (category && category !== 'all') {
-        skills = skills.filter(s => s.category === category);
+        
+        // 推荐技能
+        const recommendations = data.skills.filter(skill => {
+            return matchedCategories.some(cat => 
+                skill.tags.some(t => t.toLowerCase().includes(cat)) ||
+                skill.desc.toLowerCase().includes(cat)
+            );
+        }).slice(0, 10);
+        
+        // 构建学习路径
+        const path = recommendations.map((skill, index) => ({
+            step: index + 1,
+            skill,
+            reason: `帮助你实现${matchedCategories[0] || '目标'}相关功能`
+        }));
+        
+        res.json({
+            goal,
+            matchedCategories,
+            path,
+            totalSteps: path.length
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-    
-    skills.sort((a, b) => b.usage - a.usage);
-    
-    res.json({ 
-        ranking: skills.slice(0, parseInt(limit)).map((s, i) => ({
-            rank: i + 1,
-            ...s
-        }))
-    });
 });
 
-// 获取统计数据
-app.get('/api/stats', (req, res) => {
-    const data = loadSkillsData();
-    
-    const stats = {
-        totalSkills: data.skills.length,
-        totalCategories: data.categories.length,
-        totalUsage: data.skills.reduce((sum, s) => sum + s.usage, 0),
-        topCategory: data.categories.reduce((top, cat) => {
-            const catUsage = data.skills
-                .filter(s => s.category === cat.id)
-                .reduce((sum, s) => sum + s.usage, 0);
-            return catUsage > top.usage ? { ...cat, usage: catUsage } : top;
-        }, { usage: 0 }),
-        avgUsage: Math.round(data.skills.reduce((sum, s) => sum + s.usage, 0) / data.skills.length),
-        topSkills: [...data.skills].sort((a, b) => b.usage - a.usage).slice(0, 10)
-    };
-    
-    res.json(stats);
+// API: 搜索技能
+app.get('/api/search', (req, res) => {
+    try {
+        const { q } = req.query;
+        if (!q) {
+            return res.json([]);
+        }
+
+        const data = loadSkills();
+        const query = q.toLowerCase();
+        
+        const results = data.skills.filter(skill => {
+            return skill.title.toLowerCase().includes(query) ||
+                   skill.name.toLowerCase().includes(query) ||
+                   skill.desc.toLowerCase().includes(query) ||
+                   skill.tags.some(t => t.toLowerCase().includes(query));
+        });
+        
+        // 相关性排序
+        results.sort((a, b) => {
+            let scoreA = 0, scoreB = 0;
+            
+            if (a.title.toLowerCase() === query) scoreA += 100;
+            if (b.title.toLowerCase() === query) scoreB += 100;
+            if (a.title.toLowerCase().includes(query)) scoreA += 50;
+            if (b.title.toLowerCase().includes(query)) scoreB += 50;
+            if (a.name.toLowerCase().includes(query)) scoreA += 40;
+            if (b.name.toLowerCase().includes(query)) scoreB += 40;
+            
+            a.tags.forEach(t => {
+                if (t.toLowerCase() === query) scoreA += 30;
+                else if (t.toLowerCase().includes(query)) scoreA += 15;
+            });
+            
+            b.tags.forEach(t => {
+                if (t.toLowerCase() === query) scoreB += 30;
+                else if (t.toLowerCase().includes(query)) scoreB += 15;
+            });
+            
+            if (a.desc.toLowerCase().includes(query)) scoreA += 10;
+            if (b.desc.toLowerCase().includes(query)) scoreB += 10;
+            
+            return scoreB - scoreA;
+        });
+        
+        res.json(results);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
-// 首页
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// API: 技能关联图谱数据
+app.get('/api/graph', (req, res) => {
+    try {
+        const data = loadSkills();
+        const limit = parseInt(req.query.limit) || 60;
+        
+        // 选择热门技能
+        const topSkills = data.skills
+            .sort((a, b) => b.usage - a.usage)
+            .slice(0, limit);
+        
+        // 构建节点
+        const nodes = topSkills.map(s => ({
+            id: s.id,
+            name: s.title,
+            category: s.category,
+            usage: s.usage
+        }));
+        
+        // 构建链接
+        const links = [];
+        topSkills.forEach(skill => {
+            skill.related.forEach(rid => {
+                const target = nodes.find(n => n.id === rid);
+                if (target && skill.id < rid) {
+                    links.push({ 
+                        source: skill.id, 
+                        target: rid,
+                        weight: 1
+                    });
+                }
+            });
+        });
+        
+        res.json({ nodes, links });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`\n╔══════════════════════════════════════════════════╗`);
-    console.log(`║  🚀 Skill Hub - AI技能知识库                     ║`);
-    console.log(`╠══════════════════════════════════════════════════╣`);
-    console.log(`║  本地访问: http://localhost:${PORT}                 ║`);
-    console.log(`║  技能数量: 300+                                  ║`);
-    console.log(`╚══════════════════════════════════════════════════╝\n`);
+// 启动服务
+app.listen(PORT, () => {
+    console.log(`
+╔════════════════════════════════════════════╗
+║                                            ║
+║   🚀 Skill Hub is running!                 ║
+║                                            ║
+║   Local:  http://localhost:${PORT}            ║
+║                                            ║
+║   ✨ Discover Your Superpowers              ║
+║                                            ║
+╚════════════════════════════════════════════╝
+    `);
 });
